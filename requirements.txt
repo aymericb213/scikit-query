@@ -1,0 +1,4 @@
+pandas
+sklearn
+clustering-benchmarks
+active-semi-supervised-clustering
