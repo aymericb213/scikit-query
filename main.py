@@ -3,6 +3,7 @@ import os
 import argparse
 import clustbench
 from selection import *
+from selection.oracle import MLCLOracle
 from active_semi_clustering.semi_supervised.pairwise_constraints import COPKMeans, PCKMeans, MPCKMeans
 from sklearn.cluster import *
 from sklearn.metrics import adjusted_rand_score
