@@ -15,7 +15,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     dataset = clustbench.load_dataset("fcps", "lsun", path=args.path)
-    labels = dataset.labels[0] - 1 if args.auto else None # correspondance between clustbench and Python indexing
+    labels = dataset.labels[0] # - 1 if args.auto else None # correspondance between clustbench and Python indexing
 
     algo = COPKMeans(n_clusters=dataset.n_clusters[0])
     algo.fit(dataset.data)
@@ -23,9 +23,13 @@ if __name__ == "__main__":
     print(adjusted_rand_score(labels, algo.labels_))
     
     active_qs = NPUincr()
+    active_pairwise = Pairwise(algo,len(dataset))
+    matrice_probabilite = active_pairwise._generer_matrice_probabilite(dataset=dataset)
+    print(f'Matrice de probabilité:\n {matrice_probabilite}')
+    print(f'échantillon plus claire:\n {matrice_probabilite[0]}')
     constraints = active_qs.fit(dataset.data, algo.labels_, MLCLOracle(truth=labels))
     
-    algo.fit(dataset.data, ml=constraints["ml"], cl=constraints["cl"])
+    algo.fit(dataset.data, ml=constraints["ML"], cl=constraints["CL"])
     print(adjusted_rand_score(labels, algo.labels_))
     print(adjusted_rand_score(init_partition, algo.labels_))
 
