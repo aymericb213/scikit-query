@@ -2,3 +2,7 @@ pandas
 sklearn
 clustering-benchmarks
 active-semi-supervised-clustering
+matplotlib
+numpy
+scikit_learn
+
