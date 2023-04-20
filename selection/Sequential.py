@@ -11,8 +11,7 @@ Article :
 """
 
 class Sequential(QueryStrategy):
-    pass
-
+    
 
     def __init__(self ,dataset):
         super().__init__()
