@@ -34,10 +34,7 @@ class Pairwise(QueryStrategy):
       nombre_colonne , nombre_ligne= taille_jeu_donnee , taille_jeu_donnee
       list_cluster = None
       mat = np.array([[0.0]*nombre_colonne]*nombre_ligne) # ou  mat = np.zeros((nb_ligne,nb_colonne))   
-      taille_jeu_donnee = len(dataset.data)
-      nombre_colonne , nombre_ligne= taille_jeu_donnee , taille_jeu_donnee
-      list_cluster = None
-      mat = np.array([[0.0]*nombre_colonne]*nombre_ligne) # ou  mat = np.zeros((nb_ligne,nb_colonne))
+     
       
       for iteration in range(precision):
          array = np.copy(algo.fit(dataset.data).labels_)   
