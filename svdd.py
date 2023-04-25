@@ -8,6 +8,7 @@ import sys
 sys.path.append("..")
 import numpy as np
 import pandas as pd
+from scipy.spatial.distance import pdist, squareform
 import os
 import argparse
 import clustbench
@@ -38,35 +39,46 @@ X = dataset.data
 def svdd_clusters ():
     list_clusters = []
     list_svdd = []
-    for  indice in range ( int(dataset.n_clusters)):
-       list_clusters.append([])
-       list_svdd.append([])
-
-
     
+
+    ### Optimisation avec np
+    """
     for  indice in range ( len(dataset.data)):
        numero_cluster = dataset.labels[0][indice]
        list_clusters[numero_cluster-1].append(dataset.data[indice]) 
- 
-    
+    """
+    for cluster in range(1,int(dataset.n_clusters)+1):
+       
+       cluster_temporaire = dataset.data[np.where(dataset.labels[0] == cluster)]
+       print(len(cluster_temporaire))
+       list_clusters.append( cluster_temporaire)
+       print(len(list_clusters[cluster-1]))
+
+    """
+        Calculer le svdd pour chaque cluster
+    """
     for indice in range (int(dataset.n_clusters)):
-       X = np.array(list_clusters[indice])
-       svdd = BaseSVDD(C=0.9, gamma=0.3, kernel='rbf', display='off')
-       # fit the SVDD model
-       svdd.fit(X)
+        X = np.array(list_clusters[indice])
+        svdd = BaseSVDD(C=0.9, gamma=0.3, kernel='rbf', display='off')
+        # fit the SVDD model
+        svdd.fit(X)
 
-       # predict the label
-       y_predict = svdd.predict(X)
+        # predict the label
+        y_predict = svdd.predict(X)
 
-       list_svdd[indice].append(svdd.boundary_indices) 
-       
-       
-        
-    print(f"\nfrontière :\n{list_svdd}")
-    return list_svdd
+        list_svdd.append(svdd.boundary_indices)               
+          
+    print(f"\nfrontière :\n{list_svdd}")   
 
-svdd_clusters()   
-    
+svdd_clusters() 
+
+def distance_dataset():
+   distances = pdist(dataset.data)
+   dist_matrix = squareform(distances) 
+   print(dist_matrix)
+   print(f'Min : => {np.min(dist_matrix)}  \nMax : => {np.max(dist_matrix)}') 
+
+distance_dataset()
 
 
 """    # svdd object using rbf kernel
