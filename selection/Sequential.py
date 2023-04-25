@@ -72,7 +72,7 @@ class Sequential(QueryStrategy):
     """
     Calcul de la distance entre chaque point déterminé par le svdd du dataset avec panda
     """
-    def _distance_frontière():
+    def _distance_frontiere():
        pass 
    
     """
