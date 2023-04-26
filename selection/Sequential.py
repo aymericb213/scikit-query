@@ -20,6 +20,18 @@ class Sequential(QueryStrategy):
         super().__init__()
         self.dataset = dataset
         self.svdds = []
+        self.svdd_clusters = []
+        self.distance_data = []
+        self.distance_svdd = []
+        self.distance_svdd_clusters = []
+        self.max_data = None
+        self.min_data = None
+        self.max_svdd = None
+        self.min_svdd = None
+        self.max_svdd_cluster = None
+        self.min_svdd_cluster = None
+
+        self._svdd_clusters()
 
 
     """
@@ -55,7 +67,7 @@ class Sequential(QueryStrategy):
           y_predict = svdd.predict(X)
 
           list_svdd.append(svdd.boundary_indices)               
-            
+          self.svdds = list_svdd  
       print(f"\nfrontière :\n{list_svdd}")   
 
     """
@@ -66,19 +78,26 @@ class Sequential(QueryStrategy):
         distances = pdist(dataset.data)
         dist_matrix = squareform(distances) 
         print(dist_matrix)
-        print(f'Min : => {np.min(dist_matrix)}  \nMax : => {np.max(dist_matrix)}') 
+        print(f'Min : => {np.amin(dist_matrix[dist_matrix !=0])}  \nMax : => {np.max(dist_matrix)}') 
 
     
     """
     Calcul de la distance entre chaque point déterminé par le svdd du dataset avec panda
     """
-    def _distance_frontiere():
-       pass 
+    def _distance_frontiere(self):
+        dataset = self.dataset
+        list_svdd = self.svdds
+        # Transformer la liste multidimensionnelle en liste simple
+        flat_list_svdd_indices =  np.concatenate(list_svdd).flatten().tolist()
+        data_svdd_boundary =  dataset.data[flat_list_svdd_indices]
+        distances_svdd = pdist(data_svdd_boundary)
+        dist_matrix_svdd = squareform(distances_svdd)
+        print(dist_matrix_svdd)
+        print(f'Min : => {np.amin(dist_matrix_svdd[dist_matrix_svdd !=0])}  \nMax : => {np.max(dist_matrix_svdd)}') 
    
     """
     Calcul de la distance entre chaque point d'un clusteur avec panda , 
     effectuer sur l'ensemble des clusters du dataset
     """
     def _distance_clusters():
-       pass 
-    
+       pass

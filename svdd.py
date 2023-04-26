@@ -69,16 +69,37 @@ def svdd_clusters ():
         list_svdd.append(svdd.boundary_indices)               
           
     print(f"\nfrontière :\n{list_svdd}")   
+    return list_svdd
 
-svdd_clusters() 
+list_svdd = svdd_clusters() 
 
 def distance_dataset():
    distances = pdist(dataset.data)
    dist_matrix = squareform(distances) 
    print(dist_matrix)
-   print(f'Min : => {np.min(dist_matrix)}  \nMax : => {np.max(dist_matrix)}') 
+   print(f'Min : => {np.amin(dist_matrix[dist_matrix !=0])}  \nMax : => {np.max(dist_matrix)}') 
+
+def distances_svdd():
+    # Transformer la liste multidimensionnelle en liste simple
+    flat_list_svdd_indices =  np.concatenate(list_svdd).flatten().tolist()
+    data_svdd_boundary =  dataset.data[flat_list_svdd_indices]
+    distances_svdd = pdist(data_svdd_boundary)
+    dist_matrix_svdd = squareform(distances_svdd)
+    print(dist_matrix_svdd)
+    print(dist_matrix_svdd[0][1])
+    print(f'Min : => {np.amin(dist_matrix_svdd[dist_matrix_svdd !=0])}  \nMax : => {np.max(dist_matrix_svdd)}') 
+
+    """distances_svdd = pdist(list_svdd)
+    dist_matrix_svdd = squareform(distances_svdd)
+    print(dist_matrix_svdd)
+    """
 
 distance_dataset()
+
+print(f"\n\n\n\n")
+
+distances_svdd()
+
 
 
 """    # svdd object using rbf kernel
