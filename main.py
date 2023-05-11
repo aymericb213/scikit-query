@@ -3,6 +3,7 @@ import os
 import argparse
 import clustbench
 from selection import *
+from selection.aipc import AIPC
 from selection.oracle import MLCLOracle
 from active_semi_clustering.semi_supervised.pairwise_constraints import COPKMeans, PCKMeans, MPCKMeans
 from sklearn.cluster import *
@@ -21,15 +22,22 @@ if __name__ == "__main__":
     algo.fit(dataset.data)
     init_partition = algo.labels_
     print(adjusted_rand_score(labels, algo.labels_))
-    
-    active_qs = NPUincr()
-    active_pairwise = Pairwise(algo,len(dataset))
+
+
+    """
+     active_qs contient la stratégie choisie.
+     Il suffit de décommenter la ligne a utiliser
+    """
+    active_qs = AIPC(dataset.n_clusters[0])
+    #active_qs = NPUincr()
+    active_pairwise = Pairwise(algo, len(dataset))
     matrice_probabilite = active_pairwise._generer_matrice_probabilite(dataset=dataset)
     print(f'Matrice de probabilité:\n {matrice_probabilite}')
     print(f'échantillon plus claire:\n {matrice_probabilite[0]}')
     constraints = active_qs.fit(dataset.data, algo.labels_, MLCLOracle(truth=labels))
     Sequential = Sequential(dataset)
     Sequential.fit(MLCLOracle(truth=labels))
+
     algo.fit(dataset.data, ml=constraints["ML"], cl=constraints["CL"])
     print(adjusted_rand_score(labels, algo.labels_))
     print(adjusted_rand_score(init_partition, algo.labels_))
