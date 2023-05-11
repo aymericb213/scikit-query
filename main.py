@@ -28,17 +28,29 @@ if __name__ == "__main__":
      active_qs contient la stratégie choisie.
      Il suffit de décommenter la ligne a utiliser
     """
+
     active_qs = AIPC(dataset.n_clusters[0])
+    moyenne = 0
+    for i in range(30):
+        constraints = active_qs.fit(dataset.data, algo.labels_, MLCLOracle(truth=labels, budget=5))
+        print("iteration = ", i)
+        print("CL : ", constraints["CL"])
+        print("ML : ", constraints["ML"])
+        algo.fit(dataset.data, ml=constraints["ML"], cl=constraints["CL"])
+        moyenne += adjusted_rand_score(init_partition, algo.labels_)
+    moyenne = moyenne / 30
+    print(moyenne)
+    """
     #active_qs = NPUincr()
     active_pairwise = Pairwise(algo, len(dataset))
     matrice_probabilite = active_pairwise._generer_matrice_probabilite(dataset=dataset)
     print(f'Matrice de probabilité:\n {matrice_probabilite}')
     print(f'échantillon plus claire:\n {matrice_probabilite[0]}')
-    constraints = active_qs.fit(dataset.data, algo.labels_, MLCLOracle(truth=labels))
+    #constraints = active_qs.fit(dataset.data, algo.labels_, MLCLOracle(truth=labels, budget=10))
     Sequential = Sequential(dataset)
-    Sequential.fit(MLCLOracle(truth=labels))
+    constraints = Sequential.fit(MLCLOracle(truth=labels))
 
     algo.fit(dataset.data, ml=constraints["ML"], cl=constraints["CL"])
     print(adjusted_rand_score(labels, algo.labels_))
     print(adjusted_rand_score(init_partition, algo.labels_))
-
+    """
