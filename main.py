@@ -28,7 +28,8 @@ if __name__ == "__main__":
     print(f'Matrice de probabilité:\n {matrice_probabilite}')
     print(f'échantillon plus claire:\n {matrice_probabilite[0]}')
     constraints = active_qs.fit(dataset.data, algo.labels_, MLCLOracle(truth=labels))
-    
+    Sequential = Sequential(dataset)
+    Sequential.fit(MLCLOracle(truth=labels))
     algo.fit(dataset.data, ml=constraints["ML"], cl=constraints["CL"])
     print(adjusted_rand_score(labels, algo.labels_))
     print(adjusted_rand_score(init_partition, algo.labels_))
