@@ -38,11 +38,12 @@ class Sequential(QueryStrategy):
       dataset = self.dataset
       list_clusters = []
       list_svdd = []
+      self.label_svdds = []
      
       """
         Regroupe chaque données d'un même cluster ensemble
       """ 
-      
+      indice_depart = 0  
       for cluster in range(1,int(dataset.n_clusters)+1):
         
         cluster_temporaire = dataset.data[np.where(self.labels == cluster)]
@@ -61,8 +62,15 @@ class Sequential(QueryStrategy):
           svdd.fit(X)
           # predict the label
           y_predict = svdd.predict(X)
+          
+          
+          if(indice > 0): 
+              indice_depart+=len(list_clusters[indice-1])
+              list_svdd.append(list(np.array(svdd.boundary_indices) + indice_depart))  
+          else:
+               list_svdd.append(svdd.boundary_indices) 
 
-          list_svdd.append(svdd.boundary_indices)  
+         
           nombre_frontiere_cluster = len(list_svdd[indice])    
           self.label_svdds.extend([indice]*nombre_frontiere_cluster)         
           self.svdd_clusters = list_svdd
@@ -107,7 +115,7 @@ class Sequential(QueryStrategy):
   
     
     def fit(self,labels,oracle):
-      
+        
       self.labels = np.array(labels)
       self.labels = self.labels+1
       self._svdd_clusters()

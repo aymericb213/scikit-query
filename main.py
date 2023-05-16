@@ -71,10 +71,12 @@ if __name__ == "__main__":
      Il suffit de décommenter la ligne a utiliser
     """
 
-    active_qs = AIPC(dataset.n_clusters[0])
+    sequential = Sequential(dataset)
+    #constraints = sequential.fit(algo.labels_,MLCLOracle(truth=labels))
+    #algo.fit(dataset.data, ml=constraints["ML"], cl=constraints["CL"])
     moyenne = 0
     for i in range(30):
-        constraints = active_qs.fit(dataset.data, algo.labels_, MLCLOracle(truth=labels, budget=5))
+        constraints = sequential.fit(algo.labels_,MLCLOracle(truth=labels,budget=5))
         plot(dataset.data, algo.labels_, constraints, "partition_with_constraints.html")
         print("iteration = ", i)
         print("CL : ", constraints["CL"])
