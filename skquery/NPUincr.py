@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
-from selection.oracle.MLCLOracle import MaximumQueriesExceeded
-from selection import QueryStrategy
+from skquery.oracle.MLCLOracle import MaximumQueriesExceeded
+from skquery import QueryStrategy
 
 class NPUincr(QueryStrategy):
     """ Incremental version of NPU. Based off the implementation at

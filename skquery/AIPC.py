@@ -1,16 +1,18 @@
+"""
+ Active Informative Pairwise Constraint Formulation algorithm from Zhong et al. 2019.
+"""
+# Authors : Brice Jacquesson, Matthéo Pailler
+
 import pandas as pd
 from sklearn.metrics import pairwise_distances
-
-from selection import QueryStrategy
+from skquery import QueryStrategy
 import numpy as np
 import skfuzzy as fuzz
-"""
- implémentation de l'algorithme de l'article : 
- 'Zhong et al. - 2019 - Active Informative Pairwise Constraint Formulation'
-"""
+
+
 class AIPC(QueryStrategy):
 
-    def __init__(self, nb_centre: int, epsilon : int = 0.05):
+    def __init__(self, nb_centre: int, epsilon : float = 0.05):
         super().__init__()
         self.data = None
         self.epsilon = epsilon * nb_centre
@@ -22,13 +24,13 @@ class AIPC(QueryStrategy):
 
     def fit(self, X, partition, oracle):
         self.budget = oracle.budget
-        self.partition = partition
+
         self.data = X
 
         self._fuzzy_cmeans()
 
         ml, cl = [], []
-        constraints = {"ML": ml, "CL": cl}
+        constraints = {"ml": ml, "cl": cl}
 
         nb_queries = 0
         entropy = self._entropy()  # récupéré les weak samples (voir discord)

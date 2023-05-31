@@ -1,13 +1,18 @@
-# scikit-active
-Active query strategies for semi-supervised clustering
+# scikit-query
 
-## Lancer le script
+*scikit-query* is a library of active query strategies for constrained clustering inspired by [scikit-learn](https://scikit-learn.org)
+and the now inactive [active-semi-supervised-clustering](https://github.com/datamole-ai/active-semi-supervised-clustering) library by Jakub Švehla.
 
-1. Installer les librairies `pip install -r requirements.txt`
-2. Télécharger les jeux de données : https://github.com/gagolews/clustering-data-v1
-3. Lancer le script avec le chemin vers les jeux de données en argument `python3 main.py path/to/clustering-data`
+## Dependencies
 
-## Liens 
+scikit-query is developed on Python >= 3.10, and requires the following libraries :
 
-- https://github.com/datamole-ai/active-semi-supervised-clustering
-- https://github.com/SineZHAN/deepALplus
+- pandas~=2.0.1
+- active-semi-supervised-clustering
+- matplotlib~=3.7.1
+- numpy~=1.24.3
+- scikit-learn~=1.2.2
+- cvxopt~=1.3.1
+- scikit-fuzzy~=0.4.2
+- scipy~=1.10.1
+- plotly~=5.14.1

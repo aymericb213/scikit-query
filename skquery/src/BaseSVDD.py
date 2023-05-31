@@ -158,8 +158,8 @@ class BaseSVDD(BaseEstimator, OutlierMixin):
         self.get_model()
         display_ = self.display
         self.display = 'off'
-        self.predicted_y_ = self.predict(self.X, self.y)
-        self.accuracy = accuracy_score(self.y, self.predicted_y_)
+        #self.predicted_y_ = self.predict(self.X, self.y)
+        #self.accuracy = accuracy_score(self.y, self.predicted_y_)
         self.display = display_
         end_time = time.time()
         self.running_time = end_time - start_time
@@ -302,7 +302,8 @@ class BaseSVDD(BaseEstimator, OutlierMixin):
         results['X'], results['y'], results['y_type'], results['exist_y'] = self._check_X_y(X, y)
         results['n_samples'] = results['X'].shape[0]
         results['distance'] = self.get_distance(X)
-        results['predicted_y'] = np.mat(np.ones(results['n_samples'])).T
+        results['predicted_y'] = np.asmatrix(np.ones(results['n_samples'])).T
+        print(results['predicted_y'])
         index_ = results['distance'] > self.radius
         results['predicted_y'][index_] = -1
         results['n_alarm'] = np.sum(index_==True)  

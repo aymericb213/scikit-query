@@ -1,5 +1,5 @@
 import numpy as np
-from selection import QueryStrategy
+from skquery import QueryStrategy
 
 class Random(QueryStrategy):
     def __init__(self, n_clusters):
