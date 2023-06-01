@@ -13,11 +13,18 @@
 -->
 # scikit-query
 
-*scikit-query* is a library of active query strategies for constrained clustering inspired by [scikit-learn](https://scikit-learn.org)
+**scikit-query** is a library of active query strategies for constrained clustering inspired by [scikit-learn](https://scikit-learn.org)
 and the now inactive [active-semi-supervised-clustering](https://github.com/datamole-ai/active-semi-supervised-clustering) library by Jakub Švehla.
 
 It is focused on algorithm-agnostic query strategies, i.e. methods that do not rely on a particular clustering algorithm.
-In typical **scikit** way,
+In typical *scikit* way, the library is used by instanciating a class and using its *fit* method, passing as arguments a dataset, an oracle and optional arguments such as an existing partition of the data.
+
+``` python
+qs = QueryStrategy()
+oracle = MLCLOracle(truth=labels, budget=10)
+constraints = qs.fit(dataset.data, oracle)
+```
+
 ## Dependencies
 
 scikit-query is developed on Python >= 3.10, and requires the following libraries :

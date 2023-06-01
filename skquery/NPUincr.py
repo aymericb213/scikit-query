@@ -16,7 +16,7 @@ class NPUincr(QueryStrategy):
 
     def __init__(self, neighborhoods=None):
         super().__init__()
-        self.neighborhoods = [] if not neighborhoods else neighborhoods
+        self.neighborhoods = [] if not neighborhoods or type(neighborhoods) != list else neighborhoods
 
     def fit(self, X, partition, oracle):
         ml, cl = [], []
