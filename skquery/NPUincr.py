@@ -1,17 +1,21 @@
 import numpy as np
-from sklearn.ensemble import RandomForestClassifier
 from skquery.oracle.MLCLOracle import MaximumQueriesExceeded
 from skquery import QueryStrategy
+from sklearnex import patch_sklearn
+patch_sklearn()
+
+from sklearn.ensemble import RandomForestClassifier
+
 
 class NPUincr(QueryStrategy):
     """ Incremental version of NPU. Based off the implementation at
     https://github.com/datamole-ai/active-semi-supervised-clustering
 
     """
+
     def __init__(self, neighborhoods=None):
         super().__init__()
         self.neighborhoods = [] if not neighborhoods else neighborhoods
-
 
     def fit(self, X, partition, oracle):
         ml, cl = [], []
@@ -86,7 +90,7 @@ class NPUincr(QueryStrategy):
         S = np.zeros((n, n))
         for i in range(n):
             for j in range(n):
-                S[i, j] = (leaf_indices[i, ] == leaf_indices[j, ]).sum()
+                S[i, j] = (leaf_indices[i,] == leaf_indices[j,]).sum()
         S = S / n_trees
 
         p = np.empty((n, l))
