@@ -12,7 +12,7 @@ def test_query():
     algo = COPKMeans(n_clusters=dataset.n_clusters[0])
     algo.fit(dataset.data)
 
-    for strat in [Random, NPUincr, AIPC]:
+    for strat in [Random, FFQS, MinMax, NPUincr, AIPC]:
         qs = strat(dataset.n_clusters[0])
 
         constraints = qs.fit(dataset.data, algo.labels_, MLCLOracle(truth=labels, budget=100))

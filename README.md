@@ -32,6 +32,15 @@ oracle = MLCLOracle(truth=labels, budget=10)
 constraints = qs.fit(dataset.data, oracle)
 ```
 
+## Algorithms
+
+- random sampling
+- [FFQS](https://epubs.siam.org/doi/10.1137/1.9781611972740.31) from Basu et al. 2004
+- [MinMax](https://ieeexplore.ieee.org/document/4761792) from Mallapragada et al. 2008
+- [NPU](https://dl.acm.org/doi/10.1109/TKDE.2013.22) from Xiong et al. 2013. This is an incremental variant that doesn't rely on a constrained clustering algorithm but rather takes a partition as input and outputs a constraint set.
+- [AIPC](https://ieeexplore.ieee.org/document/8740960) from Zhang et al. 2019
+- [SASC](https://www.sciencedirect.com/science/article/abs/pii/S0031320313004068) from Abin & Beigy 2014
+
 ## Dependencies
 
 scikit-query is developed on Python >= 3.10, and requires the following libraries :
@@ -45,3 +54,5 @@ scikit-query is developed on Python >= 3.10, and requires the following librarie
 - scikit-fuzzy~=0.4.2
 - scipy~=1.10.1
 - plotly~=5.14.1
+
+## Contributors
