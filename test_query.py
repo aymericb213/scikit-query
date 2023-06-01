@@ -8,7 +8,7 @@ from sklearn.decomposition import PCA
 from sklearn.metrics import adjusted_rand_score
 
 # Choose a dataset from https://clustering-benchmarks.gagolewski.com/weave/data-v1.html
-dataset = clustbench.load_dataset("fcps", "lsun", path="clustering-data-v1-1.1.0")
+dataset = clustbench.load_dataset("fcps", "lsun", path="clustering-data-v1")
 labels = dataset.labels[0] - 1 # correspondance between clustbench and Python indexing
 
 algo = COPKMeans(n_clusters=dataset.n_clusters[0])
