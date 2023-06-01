@@ -1,7 +1,4 @@
 name: scikit-query
-channels:
-  - anaconda-fusion
-  - defaults
 dependencies:
   pip:
     - scikit-learn==1.2.2
