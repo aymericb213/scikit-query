@@ -1,22 +1,14 @@
-<!--- 
-.. image:: https://img.shields.io/pypi/v/scikit-mine.svg
-  :target: https://pypi.python.org/pypi/scikit-mine/ 
--->
-.. image:: https://codecov.io/gh/remiadon/scikit-query/branch/master/graph/badge.svg
-  :target: https://codecov.io/gh/remiadon/scikit-query
-<!--- 
-.. image:: https://pepy.tech/badge/scikit-mine
-  :target: https://pepy.tech/project/scikit-mine
+.. image:: https://codecov.io/gh/aymericb213/scikit-query/branch/master/graph/badge.svg
+  :target: https://codecov.io/gh/aymericb213/scikit-query
 
-.. image:: https://mybinder.org/badge_logo.svg
- :target: https://mybinder.org/v2/gh/scikit-mine/scikit-mine/HEAD?filepath=docs%2Ftutorials%2Fperiodic%2Fperiodic_canadian_tv.ipynb
--->
 # scikit-query
 
 Clustering aims to group data into clusters without the help of labels, unlike classification algorithms. 
-A well-known shortcoming of clustering algorithms is that they rely on an objective function geared toward specific types of clusters (convex, dense, well-separated), and hyperparameters that are hard to tune.
+A well-known shortcoming of clustering algorithms is that they rely on an objective function geared toward 
+specific types of clusters (convex, dense, well-separated), and hyperparameters that are hard to tune.
 Semi-supervised clustering mitigates these problems by injecting background knowledge in order to guide the clustering.
-Active clustering algorithms analyze the data to select interesting points to ask the user about, generating constraints that allow fast convergence towards a user-specified partition.
+Active clustering algorithms analyze the data to select interesting points to ask the user about, generating constraints
+that allow fast convergence towards a user-specified partition.
 
 **scikit-query** is a library of active query strategies for constrained clustering inspired by [scikit-learn](https://scikit-learn.org)
 and the now inactive [active-semi-supervised-clustering](https://github.com/datamole-ai/active-semi-supervised-clustering) library by Jakub Švehla.
@@ -56,3 +48,7 @@ scikit-query is developed on Python >= 3.10, and requires the following librarie
 - plotly~=5.14.1
 
 ## Contributors
+
+FFQS, MinMax and NPU are based off the original implementation of Jakub Švehla and changed for library consistency. 
+Other algorithms have been implemented by Aymeric Beauchamp or his students from the University of Orléans :
+- Salma Badri, Elis Ishimwe, Brice Jacquesson, Matthéo Pailler (2023)
