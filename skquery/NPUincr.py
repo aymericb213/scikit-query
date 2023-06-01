@@ -2,6 +2,7 @@ import numpy as np
 from skquery.oracle.MLCLOracle import MaximumQueriesExceeded
 from skquery import QueryStrategy
 from sklearnex import patch_sklearn
+
 patch_sklearn()
 
 from sklearn.ensemble import RandomForestClassifier
@@ -69,7 +70,7 @@ class NPUincr(QueryStrategy):
 
     def _most_informative(self, X, n_trees=50):
         n = X.shape[0]
-        l = len(self.neighborhoods)
+        nb_neighborhoods = len(self.neighborhoods)
 
         neighborhoods_union = set()
         for neighborhood in self.neighborhoods:
@@ -78,7 +79,7 @@ class NPUincr(QueryStrategy):
 
         unqueried_indices = set(range(n)) - neighborhoods_union
 
-        if l <= 1:
+        if nb_neighborhoods <= 1:
             return np.random.choice(list(unqueried_indices)), [1]
 
         # Learn a random forest classifier
@@ -93,23 +94,23 @@ class NPUincr(QueryStrategy):
                 S[i, j] = (leaf_indices[i,] == leaf_indices[j,]).sum()
         S = S / n_trees
 
-        p = np.empty((n, l))
+        p = np.empty((n, nb_neighborhoods))
         uncertainties = np.zeros(n)
         expected_costs = np.ones(n)
 
         # For each point that is not in any neighborhood...
         for x_i in unqueried_indices:
-            for n_i in range(l):
+            for n_i in range(nb_neighborhoods):
                 p[x_i, n_i] = (S[x_i, self.neighborhoods[n_i]].sum() / len(self.neighborhoods[n_i]))
 
             # If the point is not similar to any neighborhood set equal probabilities of belonging to each neighborhood
-            if np.all(p[x_i,] == 0):
-                p[x_i,] = np.ones(l)
+            if np.all(p[x_i, ] == 0):
+                p[x_i, ] = np.ones(nb_neighborhoods)
 
-            p[x_i,] = p[x_i,] / p[x_i,].sum()
+            p[x_i, ] = p[x_i, ] / p[x_i, ].sum()
 
-            if not np.any(p[x_i,] == 1):
-                positive_p_i = p[x_i, p[x_i,] > 0]
+            if not np.any(p[x_i, ] == 1):
+                positive_p_i = p[x_i, p[x_i, ] > 0]
                 uncertainties[x_i] = -(positive_p_i * np.log2(positive_p_i)).sum()
                 expected_costs[x_i] = (positive_p_i * range(1, len(positive_p_i) + 1)).sum()
             else:

@@ -1,6 +1,7 @@
 import numpy as np
 from skquery import QueryStrategy
 
+
 class Random(QueryStrategy):
     def __init__(self, n_clusters):
         super().__init__()
@@ -9,7 +10,7 @@ class Random(QueryStrategy):
     def fit(self, X, partition=None, oracle=None):
         ml, cl = [], []
         constraints = {"ML": ml, "CL": cl}
-        candidates = [np.random.choice(range(X.shape[0]), size=2, replace=False).tolist() for _ in range(oracle.max_queries_cnt)]
+        candidates = [np.random.choice(range(X.shape[0]), size=2, replace=False).tolist() for _ in range(oracle.budget)]
 
         for i, j in candidates:
             must_linked = oracle.query(i, j)

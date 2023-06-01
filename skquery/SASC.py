@@ -54,7 +54,7 @@ class Sequential(QueryStrategy):
             # predict the label
             # y_predict = svdd.predict(X)
 
-            if (indice > 0):
+            if indice > 0:
                 indice_depart += len(list_clusters[indice - 1])
                 list_svdd.append(list(np.array(svdd.boundary_indices) + indice_depart))
             else:
@@ -108,7 +108,7 @@ class Sequential(QueryStrategy):
 
         contraintes = {"ml": ml, "cl": cl}
 
-        ####### Hypothèse A ##########
+        # Hypothèse A
         nombre_question = oracle.budget
         t = 0
 
@@ -116,7 +116,7 @@ class Sequential(QueryStrategy):
             self.u_t(c_t, u_t_ij, cl, ml, False)
             t = t + 1
 
-        ######### Hypothèse B ###########
+        # Hypothèse B
         t = 0
         u_t_ij = self.u_indB()
         while t < nombre_question:
@@ -157,16 +157,16 @@ class Sequential(QueryStrategy):
 
         for point_cluster in range(0, len(svdds[indice_cluster])):
             # on ne considère que les point du cluster dont la distance est inférieur à celle entre jupiter et saturne
-            if (point_cluster != indice_donnee1 and distance_svdd[point_cluster, indice_donnee2] < distance_donnee1_donnee2):
+            if point_cluster != indice_donnee1 and distance_svdd[point_cluster, indice_donnee2] < distance_donnee1_donnee2:
                 distance.append(distance_svdd[point_cluster, indice_donnee2])
                 distance_indice.append(point_cluster)
 
-        if (len(distance) > 0):
+        if len(distance) > 0:
             indice = distance_indice[np.argmin(distance)]
             distance_retirable = distance_svdd[indice_donnee1, indice]
 
             # On ne prend en compte qu'une distance inférieur à celle de saturne et jupiter
-            if (distance_retirable < distance_donnee1_donnee2):
+            if distance_retirable < distance_donnee1_donnee2:
                 return distance_retirable
             else:
                 return 0.0
@@ -174,7 +174,7 @@ class Sequential(QueryStrategy):
         else:
             return 0.0
 
-        ##////////////////////////////////////////////////////////////////////////////////////////////////
+        # ////////////////////////////////////////////////////////////////////////////////////////////////
 
     """
     La fonction djc_t , calcule la distance minimale entre une contrainte candidate (i, j) et un ensemble de contraintes Ct déjà sélectionnées. 
@@ -218,7 +218,7 @@ class Sequential(QueryStrategy):
         tableau_min = [(dik + djl), (dil + djk)]
         return np.min(tableau_min)
 
-    ##//////////////////////////////////////////////////////////////////////////////////////
+    # //////////////////////////////////////////////////////////////////////////////////////
     """
     calcule d'une matrice d'utilité pour un ensemble de contraintes en se basant sur l'hypothèse A. 
     Cette hypothèse suggère que les contraintes qui sont plus éloignées de leur propre cluster sont plus utiles.
@@ -277,14 +277,14 @@ class Sequential(QueryStrategy):
                 dijout = dij
                 vijout = 0.0
                 # Vérifier si i et j ne sont pas dans le même cluster
-                if (not (label_svdd[i] == label_svdd[j])):
+                if not (label_svdd[i] == label_svdd[j]):
                     cpt_out += 1
                 else:
                     cpt_in += 1
 
-                if (not (label_svdd[i] == label_svdd[j])):
+                if not (label_svdd[i] == label_svdd[j]):
 
-                    if (dij != 0):
+                    if dij != 0:
 
                         min_ci = self.d_out_ij(ci, i, j)
                         min_cj = self.d_out_ij(cj, j, i)
@@ -303,7 +303,7 @@ class Sequential(QueryStrategy):
 
         return u_t_ij
 
-    ##////////////////////////////////////////////////////////////////////////////////////
+    # ////////////////////////////////////////////////////////////////////////////////////
 
     """
     Calcule d'une matrice d'utilité pour un ensemble de contraintes en se basant sur l'hypothèse B.
@@ -360,9 +360,9 @@ class Sequential(QueryStrategy):
                 vijout = 0.0
 
                 # Vérifier si i et j ne sont pas dans le même cluster
-                if (label_svdd[i] == label_svdd[j]):
+                if label_svdd[i] == label_svdd[j]:
 
-                    if (dij != 0):
+                    if dij != 0:
                         min_ci = self.d_out_ij(ci, i, j)
                         min_cj = self.d_out_ij(cj, j, i)
 
@@ -370,7 +370,7 @@ class Sequential(QueryStrategy):
                         dijout -= min_cj
                         vijout = dijout / dij
 
-                    if (vijout != 1):
+                    if vijout != 1:
                         u_t_ij[i, j] = (1 - vijout) * (dij / max)
 
                     else:
@@ -382,7 +382,7 @@ class Sequential(QueryStrategy):
 
         return u_t_ij
 
-    ##//////////////////////////////////////////////////////////////////////////////
+    # //////////////////////////////////////////////////////////////////////////////
 
     """
     La fonction u_t se charge de la sélection des contraintes en se basant sur les mesures d'utilité calculées par les fonctions u_indA et u_indB.
@@ -422,16 +422,16 @@ class Sequential(QueryStrategy):
         x, y = np.unravel_index(max_ij, u_t_ij.shape)
         dij = distance_svdd[x, y]
         np_c_t = np.array(c_t)
-        if (x != y):
-            if (len(c_t) > 0 and max_ij != -1):
+        if x != y:
+            if len(c_t) > 0 and max_ij != -1:
 
                 # vérifier si le couple (i,j) appartient au tableau
                 indices = np.where((np_c_t[:, 0] == x) & (np_c_t[:, 1] == y))
                 indices = np.asarray(indices)
 
-                if (indices.size == 0):
+                if indices.size == 0:
                     c_t.append([x, y, dij])
-                    if (link):
+                    if link:
                         ml.append([svdds[x], svdds[y]])
                     else:
                         cl.append([svdds[x], svdds[y]])
@@ -439,7 +439,7 @@ class Sequential(QueryStrategy):
 
             else:
                 c_t.append([x, y, dij])
-                if (link):
+                if link:
                     ml.append([svdds[x], svdds[y]])
                 else:
                     cl.append([svdds[x], svdds[y]])
@@ -449,6 +449,6 @@ class Sequential(QueryStrategy):
         for i in range(0, taille):
             for j in range((i + 1), taille):
 
-                if (u_t_ij[i, j] != -1):
+                if u_t_ij[i, j] != -1:
                     djct = self.djc_t(c_t, i, j)
                     u_t_ij[i, j] = (u_t_ij[i, j] * djct) / max
