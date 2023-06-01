@@ -1,4 +1,4 @@
-himport clustbench
+import clustbench
 from skquery import *
 from skquery.oracle import MLCLOracle
 from active_semi_clustering.semi_supervised.pairwise_constraints import COPKMeans
