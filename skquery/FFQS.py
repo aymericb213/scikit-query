@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from scipy.spatial.distance import euclidean
 from skquery.oracle.MLCLOracle import MaximumQueriesExceeded
 from skquery import QueryStrategy
@@ -105,6 +106,7 @@ class FFQS(QueryStrategy):
 
 
 def dist(i, S, points):
+    points = pd.DataFrame(points)
     distances = np.array([euclidean(points.iloc[i, :], points.iloc[j, :]) for j in S])
     return distances.min()
 
