@@ -11,6 +11,7 @@ class FFQS(QueryStrategy):
         self.neighborhoods = [] if not neighborhoods or type(neighborhoods) != list else neighborhoods
 
     def fit(self, dataset, partition, oracle):
+        dataset = pd.DataFrame(dataset)
         if not self.neighborhoods:
             self._explore(dataset, len(set(partition)), oracle)
         self._consolidate(dataset, oracle)
@@ -106,7 +107,6 @@ class FFQS(QueryStrategy):
 
 
 def dist(i, S, points):
-    points = pd.DataFrame(points)
     distances = np.array([euclidean(points.iloc[i, :], points.iloc[j, :]) for j in S])
     return distances.min()
 
