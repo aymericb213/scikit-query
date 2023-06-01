@@ -6,8 +6,6 @@ from skquery.oracle import MLCLOracle
 from active_semi_clustering.semi_supervised.pairwise_constraints import COPKMeans, PCKMeans, MPCKMeans
 from sklearn.decomposition import PCA
 from sklearn.metrics import adjusted_rand_score
-import plotly.express as px
-import plotly.graph_objects as go
 
 # Choose a dataset from https://clustering-benchmarks.gagolewski.com/weave/data-v1.html
 dataset = clustbench.load_dataset("fcps", "lsun", path="clustering-data-v1-1.1.0")
