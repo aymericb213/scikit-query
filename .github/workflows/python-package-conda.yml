@@ -31,7 +31,7 @@ jobs:
     - name: Test with pytest
       run: |
         conda install pytest
-        pytest --cov-report xml --cov=skquery skquery coverage report
+        pytest
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v3
       with:
