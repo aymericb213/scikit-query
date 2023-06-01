@@ -20,7 +20,7 @@ class NPUincr(QueryStrategy):
 
     def fit(self, X, partition, oracle):
         ml, cl = [], []
-        constraints = {"ML": ml, "CL": cl}
+        constraints = {"ml": ml, "cl": cl}
         self.partition = partition
         n = X.shape[0]
 

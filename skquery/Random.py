@@ -9,7 +9,7 @@ class Random(QueryStrategy):
 
     def fit(self, X, partition=None, oracle=None):
         ml, cl = [], []
-        constraints = {"ML": ml, "CL": cl}
+        constraints = {"ml": ml, "cl": cl}
         candidates = [np.random.choice(range(X.shape[0]), size=2, replace=False).tolist() for _ in range(oracle.budget)]
 
         for i, j in candidates:
