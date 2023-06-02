@@ -2,6 +2,7 @@ import clustbench
 from skquery import *
 from skquery.oracle import MLCLOracle
 from active_semi_clustering.semi_supervised.pairwise_constraints import COPKMeans
+from time import time
 
 
 def test_query():
@@ -15,5 +16,8 @@ def test_query():
     for strat in [Random, FFQS, MinMax, NPUincr, AIPC]:
         qs = strat(dataset.n_clusters[0])
 
+        t1 = time()
         constraints = qs.fit(dataset.data, algo.labels_, MLCLOracle(truth=labels, budget=100))
+        print(f"{strat.__name__} : {time() - t1} seconds to fit")
+
         algo.fit(dataset.data, ml=constraints["ml"], cl=constraints["cl"])
