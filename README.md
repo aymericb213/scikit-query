@@ -1,5 +1,4 @@
-.. image:: https://codecov.io/gh/aymericb213/scikit-query/branch/master/graph/badge.svg
-  :target: https://codecov.io/gh/aymericb213/scikit-query
+[![codecov](https://codecov.io/github/aymericb213/scikit-query/branch/main/graph/badge.svg?token=ZU4OEZKSP9)](https://codecov.io/github/aymericb213/scikit-query)
 
 # scikit-query
 
@@ -29,7 +28,8 @@ constraints = qs.fit(dataset.data, oracle)
 - random sampling
 - [FFQS](https://epubs.siam.org/doi/10.1137/1.9781611972740.31) from Basu et al. 2004
 - [MinMax](https://ieeexplore.ieee.org/document/4761792) from Mallapragada et al. 2008
-- [NPU](https://dl.acm.org/doi/10.1109/TKDE.2013.22) from Xiong et al. 2013. This is an incremental variant that doesn't rely on a constrained clustering algorithm but rather takes a partition as input and outputs a constraint set.
+- [NPU](https://dl.acm.org/doi/10.1109/TKDE.2013.22) from Xiong et al. 2013. 
+This is an incremental variant that doesn't rely on a constrained clustering algorithm but rather takes a partition as input and outputs a constraint set.
 - [AIPC](https://ieeexplore.ieee.org/document/8740960) from Zhang et al. 2019
 - [SASC](https://www.sciencedirect.com/science/article/abs/pii/S0031320313004068) from Abin & Beigy 2014
 
@@ -37,14 +37,13 @@ constraints = qs.fit(dataset.data, oracle)
 
 scikit-query is developed on Python >= 3.10, and requires the following libraries :
 
-- pandas~=2.0.1
-- active-semi-supervised-clustering
-- matplotlib~=3.7.1
 - numpy~=1.24.3
-- scikit-learn~=1.2.2
-- cvxopt~=1.3.1
-- scikit-fuzzy~=0.4.2
 - scipy~=1.10.1
+- pandas~=2.0.1
+- scikit-learn~=1.2.2
+- scikit-fuzzy~=0.4.2
+- cvxopt~=1.3.1
+- matplotlib~=3.7.1
 - plotly~=5.14.1
 
 ## Contributors

@@ -1,17 +1,12 @@
 import numpy as np
 from skquery.oracle.MLCLOracle import MaximumQueriesExceeded
 from skquery import QueryStrategy
-from sklearnex import patch_sklearn
-
-patch_sklearn()
-
 from sklearn.ensemble import RandomForestClassifier
 
 
 class NPUincr(QueryStrategy):
     """ Incremental version of NPU. Based off the implementation at
     https://github.com/datamole-ai/active-semi-supervised-clustering
-
     """
 
     def __init__(self, neighborhoods=None):

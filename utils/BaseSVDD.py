@@ -551,8 +551,8 @@ class BaseSVDD(BaseEstimator, OutlierMixin):
         end_time = time.time()
         print('Calculation of the grid scores is completed. Time cost %.4f seconds\n' % (end_time - start_time))
 
-        fig = plt.figure(figsize=(20, 6))
-
+        fig = plt.figure(figsize=(20, 20))
+        """
         # figure 1: the 3D contour
         ax1 = fig.add_subplot(1, 3, 1, projection='3d')
         ax1.plot_surface(xv, yv, distance, cmap=color_map)
@@ -565,9 +565,9 @@ class BaseSVDD(BaseEstimator, OutlierMixin):
         ctf2 = ax2.contour(xv, yv, distance, n_level, colors='black', linewidths=1)
         plt.clabel(ctf2, inline=True)
         plt.colorbar(ctf1)
-
+        """
         # figure 3: the 2D contour and data
-        ax3 = fig.add_subplot(1, 3, 3)
+        ax3 = fig.add_subplot(1, 1, 1)
         _, y, _, _ = self._check_X_y(X, y)
         tmp_1 = y == 1
         tmp_2 = y == -1
@@ -575,24 +575,10 @@ class BaseSVDD(BaseEstimator, OutlierMixin):
         negative_indices = tmp_2[:, 0]
 
         if self.y_type == 'single':
-
             ax3.scatter(X[:, 0],
                         X[:, 1],
                         facecolor='C0', marker='o', s=100, linewidths=2,
                         edgecolor='black', zorder=2)
-
-            ax3.scatter(X[self.support_vector_indices, 0],
-                        X[self.support_vector_indices, 1],
-                        facecolor='C2', marker='o', s=144, linewidths=2,
-                        edgecolor='black', zorder=2)
-
-            ax3.contour(xv, yv, distance, levels=[self.radius],
-                        colors='C3', linewidths=7, zorder=1)
-
-            ax3.legend(["Data", "Support vectors"],
-                       ncol=1, loc='upper left', edgecolor='black',
-                       markerscale=1.2, fancybox=True)
-
         else:
             ax3.scatter(X[positive_indices, 0],
                         X[positive_indices, 1],
@@ -604,90 +590,21 @@ class BaseSVDD(BaseEstimator, OutlierMixin):
                         facecolor='C4', marker='s', s=100, linewidths=2,
                         edgecolor='black', zorder=2)
 
-            ax3.scatter(X[self.support_vector_indices, 0],
-                        X[self.support_vector_indices, 1],
-                        facecolor='C2', marker='o', s=144, linewidths=2,
-                        edgecolor='black', zorder=2)
+        ax3.scatter(X[self.support_vector_indices, 0],
+                    X[self.support_vector_indices, 1],
+                    facecolor='C2', marker='o', s=144, linewidths=2,
+                    edgecolor='black', zorder=2)
 
-            ax3.contour(xv, yv, distance, levels=[self.radius],
-                        colors='C3', linewidths=7, zorder=1)
+        line = ax3.contour(xv, yv, distance, levels=[self.radius],
+                           colors='C3', linewidths=7, zorder=1)
 
-            ax3.legend(["Data (+)", "Data (-)", "Support vectors"],
-                       ncol=1, loc='upper left', edgecolor='black',
-                       markerscale=1.2, fancybox=True)
+        for i in range(len(line.allsegs[0])):
+            ax3.scatter(line.allsegs[0][i][:, 0], line.allsegs[0][i][:, 1], c="orange")
+
+        ax3.legend(["Data", "Support vectors"] if self.y_type == "single" else ["Data (+)", "Data (-)", "Support vectors"],
+                   ncol=1, loc='upper left', edgecolor='black',
+                   markerscale=1.2, fancybox=True)
 
         plt.grid()
         plt.show()
-
-
-class BananaDataset():
-    """
-        Banana-shaped dataset generation and partitioning.
-        
-    """
-
-    def generate(**kwargs):
-        # Banana-shaped dataset generation
-        number = kwargs['number']
-        display = kwargs['display']
-
-        # parameters for banana-shaped dataset
-        sizeBanana = 3
-        varBanana = 1.2
-        param_1 = 0.02
-        param_2 = 0.02
-        param_3 = 0.98
-        param_4 = -0.8  # x-axsis shift
-        # generate 
-        class_p = param_1 * np.pi + np.random.rand(number, 1) * param_3 * np.pi
-        data_p = np.append(sizeBanana * np.sin(class_p), sizeBanana * np.cos(class_p), axis=1)
-        data_p = data_p + np.random.rand(number, 2) * varBanana
-        data_p[:, 0] = data_p[:, 0] - sizeBanana * 0.5
-        label_p = np.ones((number, 1), dtype=np.int64)
-
-        class_n = param_2 * np.pi - np.random.rand(number, 1) * param_3 * np.pi
-        data_n = np.append(sizeBanana * np.sin(class_n), sizeBanana * np.cos(class_n), axis=1)
-        data_n = data_n + np.random.rand(number, 2) * varBanana
-        data_n = data_n + np.ones((number, 1)) * [sizeBanana * param_4, sizeBanana * param_4]
-        data_n[:, 0] = data_n[:, 0] + sizeBanana * 0.5
-        label_n = -np.ones((number, 1), dtype=np.int64)
-
-        # banana-shaped dataset
-        data = np.append(data_p, data_n, axis=0)
-        label = np.append(label_p, label_n, axis=0)
-
-        if display == 'on':
-            pIndex = label == 1
-            nIndex = label == -1
-            fig = plt.figure(figsize=(10, 6))
-            ax = fig.add_subplot(1, 1, 1)
-            ax.scatter(data[pIndex[:, 0], 0], data[pIndex[:, 0], 1],
-                       facecolor='C0', marker='o', s=100, linewidths=2,
-                       edgecolor='black', zorder=2)
-
-            ax.scatter(data[nIndex[:, 0], 0], data[nIndex[:, 0], 1],
-                       facecolor='C3', marker='o', s=100, linewidths=2,
-                       edgecolor='black', zorder=2)
-
-            ax.set_xlim([-6, 5])
-            ax.set_ylim([-7, 7])
-
-        return data, label
-
-    def split(data, label, **kwargs):
-        # Banana-shaped dataset partitioning.
-
-        ratio = kwargs['ratio']
-        X_train, X_test, y_train, y_test = train_test_split(data, label, test_size=ratio,
-                                                            random_state=None, shuffle=True, stratify=label)
-        pIndex = y_train == 1
-        nIndex = y_train == -1
-        X_train = np.append(X_train[pIndex[:, 0], :], X_train[nIndex[:, 0], :], axis=0)
-        y_train = np.append(y_train[pIndex[:, 0], :], y_train[nIndex[:, 0], :], axis=0)
-
-        pIndex = y_test == 1
-        nIndex = y_test == -1
-        X_test = np.append(X_test[pIndex[:, 0], :], X_test[nIndex[:, 0], :], axis=0)
-        y_test = np.append(y_test[pIndex[:, 0], :], y_test[nIndex[:, 0], :], axis=0)
-
-        return X_train, X_test, y_train, y_test
+        return line.allsegs[0]
