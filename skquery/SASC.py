@@ -62,7 +62,7 @@ class SASC(QueryStrategy):
         Regroupe chaque données d'un même cluster ensemble
         """
         indice_depart = 0
-        for cluster in range(1, len(set(self.partition)) + 1):
+        for cluster in set(self.partition):
             cluster_temporaire = dataset[np.where(self.partition == cluster)]
             list_clusters.append(cluster_temporaire)
 
@@ -72,7 +72,7 @@ class SASC(QueryStrategy):
                 On récuprére les frontières via des indices (svd.boundary_indices)       
 
         """
-        for indice in range(int(dataset.n_clusters)):
+        for indice in set(self.partition):
             X = np.array(list_clusters[indice])
             svdd = BaseSVDD(C=0.9, gamma=0.3, kernel='rbf', display='off')
             # fit the SVDD model
