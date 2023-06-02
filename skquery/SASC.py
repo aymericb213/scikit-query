@@ -10,7 +10,7 @@ import pandas as pd
 from scipy.spatial.distance import pdist, squareform
 
 
-class Sequential(QueryStrategy):
+class SASC(QueryStrategy):
 
     def __init__(self, alpha=0.5):
         super().__init__()
