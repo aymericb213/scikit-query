@@ -12,22 +12,48 @@ from scipy.spatial.distance import pdist, squareform
 
 class Sequential(QueryStrategy):
 
-    def __init__(self, dataset):
+    def __init__(self, alpha=0.5):
         super().__init__()
-        self.dataset = dataset
-        self.labels = []
+        self.alpha = alpha
         self.svdd_clusters = []
         self.svdd_cluster = []
         self.label_svdds = []
         self.distance_svdd = []
         self.max = 0
 
-    def _svdd_clusters(self):
+    def fit(self, X, partition, oracle):
+        self.partition = partition
+        self._svdd_clusters(X)
+        self._distance_frontiere(X)
+
+        c_t = []
+        ml = []
+        cl = []
+        contraintes = {"ml": ml, "cl": cl}
+
+        # Hypothèse A
+        budget_ha = int(self.alpha * oracle.budget)
+        t = 0
+        u_t_ij = self.u_indA()
+        while t < budget_ha:
+            self.u_t(c_t, u_t_ij, cl, ml, False)
+            t = t + 1
+
+        # Hypothèse B
+        t = 0
+        u_t_ij = self.u_indB()
+        while t < oracle.budget - budget_ha:
+            self.u_t(c_t, u_t_ij, cl, ml, True)
+            t = t + 1
+
+        print(f'\n\n\nImplémentation, Contrainte séquentielle (Ahmad Ali Abinn, Hamid Beigy):\n\n {contraintes}')
+        return contraintes
+
+    def _svdd_clusters(self, dataset):
         """
           Version  Optimisée avec numpy
           Déterminer les données à la frontière pour chaque cluster
         """
-        dataset = self.dataset
         list_clusters = []
         list_svdd = []
         self.label_svdds = []
@@ -36,8 +62,8 @@ class Sequential(QueryStrategy):
         Regroupe chaque données d'un même cluster ensemble
         """
         indice_depart = 0
-        for cluster in range(1, int(dataset.n_clusters) + 1):
-            cluster_temporaire = dataset.data[np.where(self.labels == cluster)]
+        for cluster in range(1, len(set(self.partition)) + 1):
+            cluster_temporaire = dataset[np.where(self.partition == cluster)]
             list_clusters.append(cluster_temporaire)
 
         """
@@ -67,64 +93,27 @@ class Sequential(QueryStrategy):
 
         print(f"\nfrontière :\n{list_svdd}\n\nLabel:\n{self.label_svdds}")
 
-    def _distance_dataset(self):
+    def _distance_dataset(self, dataset):
         """
         Calcul de la distance entre chaque point du dataset avec pdist et squareform
         """
-        dataset = self.dataset
-        distances = pdist(dataset.data)
+        distances = pdist(dataset)
         dist_matrix = squareform(distances)
         print(dist_matrix)
         print(f'Min : => {np.amin(dist_matrix[dist_matrix != 0])}  \nMax : => {np.max(dist_matrix)}')
 
-    def _distance_frontiere(self):
+    def _distance_frontiere(self, dataset):
         """
         Calcul de la distance entre chaque point déterminé par le svdd du dataset avec pdist et squareform
         """
-        dataset = self.dataset
         list_svdd = self.svdd_clusters
         # Transformer la liste multidimensionnelle en liste simple
         flat_list_svdd_indices = np.concatenate(list_svdd).flatten().tolist()
         # on récuprére uniquement les données correspondants aux indices obtenue via la fonction _svdd_clusters()
-        data_svdd_boundary = dataset.data[flat_list_svdd_indices]
-        distances_svdd = pdist(data_svdd_boundary)
-        dist_matrix_svdd = squareform(distances_svdd)
+        data_svdd_boundary = dataset[flat_list_svdd_indices]
+        dist_matrix_svdd = squareform(pdist(data_svdd_boundary))
         self.distance_svdd = dist_matrix_svdd
         self.max = np.max(dist_matrix_svdd)
-
-    def fit(self, labels, oracle):
-        """
-         Prend en paramètre un label et un oracle
-        """
-        self.labels = np.array(labels)
-        self.labels = self.labels + 1
-        self._svdd_clusters()
-        self._distance_frontiere()
-
-        u_t_ij = self.u_indA()
-        c_t = []
-        ml = []
-        cl = []
-
-        contraintes = {"ml": ml, "cl": cl}
-
-        # Hypothèse A
-        nombre_question = oracle.budget
-        t = 0
-
-        while t < nombre_question:
-            self.u_t(c_t, u_t_ij, cl, ml, False)
-            t = t + 1
-
-        # Hypothèse B
-        t = 0
-        u_t_ij = self.u_indB()
-        while t < nombre_question:
-            self.u_t(c_t, u_t_ij, cl, ml, True)
-            t = t + 1
-
-        print(f'\n\n\nImplémentation, Contrainte séquentielle (Ahmad Ali Abinn, Hamid Beigy):\n\n {contraintes}')
-        return contraintes
 
     # ////////////////////////////////////////////////////////////////////////////////////////////////
     """
@@ -435,8 +424,6 @@ class Sequential(QueryStrategy):
                         ml.append([svdds[x], svdds[y]])
                     else:
                         cl.append([svdds[x], svdds[y]])
-
-
             else:
                 c_t.append([x, y, dij])
                 if link:
