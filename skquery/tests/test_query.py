@@ -12,7 +12,7 @@ from sklearn.cluster import KMeans
 
 
 def test_query():
-    dataset = clustbench.load_dataset("fcps", "lsun", path="../../clustering-data-v1")
+    dataset = clustbench.load_dataset("fcps", "lsun", path="clustering-data-v1")
     labels = dataset.labels[0] - 1  # correspondance between clustbench and Python indexing
 
     algo = KMeans(n_clusters=dataset.n_clusters[0])
@@ -25,7 +25,7 @@ def test_query():
 
 
 def timing():
-    dataset = clustbench.load_dataset("fcps", "lsun", path="../../clustering-data-v1")
+    dataset = clustbench.load_dataset("fcps", "lsun", path="clustering-data-v1")
     labels = dataset.labels[0] - 1  # correspondance between clustbench and Python indexing
 
     algo = KMeans(n_clusters=dataset.n_clusters[0])
@@ -36,6 +36,3 @@ def timing():
         t1 = time()
         qs.fit(dataset.data, algo.labels_, MLCLOracle(truth=labels, budget=10))
         print(f"{strat.__name__} : {time() - t1} seconds to fit")
-
-
-timing()
