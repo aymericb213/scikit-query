@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.spatial.distance import euclidean
-from skquery.oracle.MLCLOracle import MaximumQueriesExceeded
-from skquery import FFQS
+from ..exceptions import MaximumQueriesExceeded
+from .FFQS import FFQS
 
 
 class MinMax(FFQS):

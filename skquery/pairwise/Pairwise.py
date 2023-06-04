@@ -1,6 +1,5 @@
 from active_semi_clustering.semi_supervised.pairwise_constraints import COPKMeans
-from skquery.oracle.MLCLOracle import MaximumQueriesExceeded
-from skquery import QueryStrategy
+from ..strategy import QueryStrategy
 import numpy as np
 
 

@@ -1,5 +1,5 @@
 import numpy as np
-from skquery import QueryStrategy
+from ..strategy import QueryStrategy
 
 
 class Random(QueryStrategy):

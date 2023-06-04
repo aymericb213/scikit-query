@@ -5,7 +5,7 @@
 
 import pandas as pd
 from sklearn.metrics import pairwise_distances
-from skquery import QueryStrategy
+from ..strategy import QueryStrategy
 import numpy as np
 import skfuzzy as fuzz
 

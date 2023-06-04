@@ -545,11 +545,11 @@ class BaseSVDD(BaseEstimator, OutlierMixin):
         xv, yv = np.meshgrid(x_range[:, 0], x_range[:, 1])
         num1 = xv.shape[0]
         num2 = yv.shape[0]
-        print('Calculating the grid scores (%04d*%04d)...\n' % (num1, num2))
+        #print('Calculating the grid scores (%04d*%04d)...\n' % (num1, num2))
         distance_ = self.get_distance(np.c_[xv.ravel(), yv.ravel()])
         distance = distance_.reshape(xv.shape)
         end_time = time.time()
-        print('Calculation of the grid scores is completed. Time cost %.4f seconds\n' % (end_time - start_time))
+        #print('Calculation of the grid scores is completed. Time cost %.4f seconds\n' % (end_time - start_time))
 
         fig = plt.figure(figsize=(20, 20))
         """

@@ -1,5 +1,4 @@
-class MaximumQueriesExceeded(Exception):
-    pass
+from ..exceptions import MaximumQueriesExceeded
 
 
 class MLCLOracle:

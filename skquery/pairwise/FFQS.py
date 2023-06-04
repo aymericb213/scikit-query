@@ -1,8 +1,8 @@
 import numpy as np
 import pandas as pd
 from scipy.spatial.distance import euclidean
-from skquery.oracle.MLCLOracle import MaximumQueriesExceeded
-from skquery import QueryStrategy
+from ..exceptions import MaximumQueriesExceeded
+from ..strategy import QueryStrategy
 
 
 class FFQS(QueryStrategy):

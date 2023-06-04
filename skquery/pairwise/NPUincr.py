@@ -1,6 +1,6 @@
 import numpy as np
-from skquery.oracle.MLCLOracle import MaximumQueriesExceeded
-from skquery import QueryStrategy
+from ..exceptions import MaximumQueriesExceeded
+from ..strategy import QueryStrategy
 from sklearn.ensemble import RandomForestClassifier
 
 

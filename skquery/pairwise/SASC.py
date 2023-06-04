@@ -3,12 +3,10 @@ Sequential approach for Active Constraint Selection from Abin & Beigy 2014
 """
 # Authors : Salma Badri, Elis Ishimwe, Aymeric Beauchamp
 
-from skquery import QueryStrategy
-from utils.BaseSVDD import BaseSVDD
+from ..strategy import QueryStrategy
+from ..utils import BaseSVDD, interpolated_intercepts
 import numpy as np
-import pandas as pd
 from scipy.spatial.distance import pdist, squareform
-from utils.line_intercept import interpolated_intercepts
 
 
 class SASC(QueryStrategy):
@@ -48,7 +46,6 @@ class SASC(QueryStrategy):
             self.u_t(c_t, u_t_ij, cl, ml, True)
             t = t + 1
 
-        print(f'\n\n\nImplémentation, Contrainte séquentielle (Ahmad Ali Abinn, Hamid Beigy):\n\n {contraintes}')
         return contraintes
 
     def _svdd(self, dataset):
@@ -57,7 +54,6 @@ class SASC(QueryStrategy):
         svdd.fit(dataset)
         self.boundary = svdd.plot_boundary(dataset)
         self.support_vectors = svdd.boundary_indices
-        print(f"frontière : {self.support_vectors}")
 
     def _svdd_clusters(self, dataset):
         """
@@ -107,8 +103,8 @@ class SASC(QueryStrategy):
         Calcul de la distance entre chaque point du dataset avec pdist et squareform
         """
         dist_matrix = squareform(pdist(dataset))
-        print(dist_matrix)
-        print(f'Min : => {np.amin(dist_matrix[dist_matrix != 0])}  \nMax : => {np.max(dist_matrix)}')
+        #print(dist_matrix)
+        #print(f'Min : => {np.amin(dist_matrix[dist_matrix != 0])}  \nMax : => {np.max(dist_matrix)}')
         return dist_matrix.flatten()
 
     def _distance_frontiere(self, dataset):
