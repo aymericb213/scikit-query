@@ -1,4 +1,8 @@
+[![version](https://img.shields.io/pypi/v/scikit-query)](https://pypi.org/project/scikit-query)
+[![Python](https://img.shields.io/pypi/pyversions/scikit-query)]()
 [![codecov](https://codecov.io/github/aymericb213/scikit-query/branch/main/graph/badge.svg?token=ZU4OEZKSP9)](https://codecov.io/github/aymericb213/scikit-query)
+[![license](https://img.shields.io/pypi/l/scikit-query)](https://choosealicense.com/licenses/bsd-3-clause)
+[![Downloads](https://static.pepy.tech/badge/scikit-query)](https://pepy.tech/project/scikit-query)
 
 # scikit-query
 
@@ -37,14 +41,14 @@ This is an incremental variant that doesn't rely on a constrained clustering alg
 
 scikit-query is developed on Python >= 3.10, and requires the following libraries :
 
-- numpy~=1.24.3
-- scipy~=1.10.1
-- pandas~=2.0.1
-- scikit-learn~=1.2.2
-- scikit-fuzzy~=0.4.2
-- cvxopt~=1.3.1
-- matplotlib~=3.7.1
-- plotly~=5.14.1
+- numpy>=1.24.3
+- scipy>=1.10.1
+- pandas>=2.0.1
+- scikit-learn>=1.2.2
+- scikit-fuzzy>=0.4.2
+- cvxopt>=1.3.1
+- matplotlib>=3.7.1
+- plotly>=5.14.1
 
 ## Contributors
 
