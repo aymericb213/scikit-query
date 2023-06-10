@@ -33,10 +33,11 @@ class NPU(QueryStrategy):
 
         while True:
             try:
-                if self.clusterer:
+                if self.clusterer is not None:
                     # only works with CC algorithms from active-semi-supervised-clustering library
-                    self.clusterer.fit(X, ml=ml, cl=cl)
+                    self.clusterer.fit(X.to_numpy(), ml=ml, cl=cl)
                     self.partition = self.clusterer.labels_
+
                 x_i, p_i = self._most_informative(X)
 
                 sorted_neighborhoods = list(zip(*reversed(sorted(zip(p_i, self.neighborhoods)))))[1]

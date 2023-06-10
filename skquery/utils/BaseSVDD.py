@@ -606,5 +606,5 @@ class BaseSVDD(BaseEstimator, OutlierMixin):
                    markerscale=1.2, fancybox=True)
 
         plt.grid()
-        plt.show()
+        #plt.show()
         return line.allsegs[0]
