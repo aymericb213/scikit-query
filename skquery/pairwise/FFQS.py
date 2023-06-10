@@ -95,16 +95,15 @@ class FFQS(QueryStrategy):
                 break
 
     def get_constraints_from_neighborhoods(self):
-        ml = []
+        ml, cl = [], []
 
         for neighborhood in self.neighborhoods:
+
             for i in neighborhood:
                 for j in neighborhood:
                     if i != j:
                         ml.append((i, j))
 
-        cl = []
-        for neighborhood in self.neighborhoods:
             for other_neighborhood in self.neighborhoods:
                 if neighborhood != other_neighborhood:
                     for i in neighborhood:
