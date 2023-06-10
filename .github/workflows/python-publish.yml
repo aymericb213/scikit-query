@@ -9,10 +9,8 @@
 name: Upload Python Package
 
 on:
-    workflow_run:
-      workflows: ["Python Package using Conda"]
-      types:
-        - completed
+  release:
+    types: [published]
 
 permissions:
   contents: read

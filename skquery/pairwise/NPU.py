@@ -26,7 +26,7 @@ class NPU(QueryStrategy):
             # disregard if a CC algorithm is provided
             self.partition = kwargs["partition"]
 
-        if len(self.neighborhoods == 0):
+        if len(self.neighborhoods) == 0:
             # Initialization
             x_i = np.random.choice(list(range(X.shape[0])))
             self.neighborhoods.append([x_i])
