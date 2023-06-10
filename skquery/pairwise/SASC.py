@@ -20,8 +20,7 @@ class SASC(QueryStrategy):
         self.distance_svdd = []
         self.max = 0
 
-    def fit(self, X, partition, oracle):
-        self.partition = partition
+    def fit(self, X, oracle, **kwargs):
         #self._svdd_clusters(X)
         self._svdd(X)
         self._distance_frontiere(X)

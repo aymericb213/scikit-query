@@ -8,13 +8,24 @@ from ..strategy import QueryStrategy
 class FFQS(QueryStrategy):
     def __init__(self, neighborhoods=None):
         super().__init__()
+        self.partition = []
         self.neighborhoods = [] if not neighborhoods or type(neighborhoods) != list else neighborhoods
 
-    def fit(self, dataset, partition, oracle):
-        dataset = pd.DataFrame(dataset)
-        if not self.neighborhoods:
-            self._explore(dataset, len(set(partition)), oracle)
-        self._consolidate(dataset, oracle)
+    def fit(self, X, oracle, **kwargs):
+        X = self._check_dataset_type(X)
+        if "partition" in kwargs:
+            self.partition = kwargs["partition"]
+
+        if len(self.partition) > 0:
+            K = len(set(self.partition))
+        elif "n_clusters" in kwargs:
+            K = kwargs["n_clusters"]
+        else:
+            raise ValueError("No cluster number provided")
+
+        if 0 <= len(self.neighborhoods) < K:
+            self._explore(X, K, oracle)
+        self._consolidate(X, oracle)
 
         ml, cl = self.get_constraints_from_neighborhoods()
         constraints = {"ml": ml, "cl": cl}
@@ -22,21 +33,20 @@ class FFQS(QueryStrategy):
 
     def _explore(self, X, k, oracle):
         traversed = []
-        n = X.shape[0]
 
-        x = np.random.choice(n)
-        self.neighborhoods.append([x])
-        traversed.append(x)
+        if not self.neighborhoods:
+            x = np.random.choice(X.shape[0])
+            self.neighborhoods.append([x])
+            traversed.append(x)
 
-        try:
-            while len(self.neighborhoods) < k:
-
+        while len(self.neighborhoods) < k:
+            try:
                 max_distance = 0
                 farthest = None
 
-                for i in range(n):
+                for i in range(X.shape[0]):
                     if i not in traversed:
-                        distance = dist(i, traversed, X)
+                        distance = np.array([euclidean(X.iloc[i, :], X.iloc[j, :]) for j in traversed]).min()
                         if distance > max_distance:
                             max_distance = distance
                             farthest = i
@@ -53,19 +63,17 @@ class FFQS(QueryStrategy):
 
                 traversed.append(farthest)
 
-        except MaximumQueriesExceeded:
-            pass
+            except MaximumQueriesExceeded:
+                break
 
     def _consolidate(self, X, oracle):
-        n = X.shape[0]
-
         neighborhoods_union = set()
         for neighborhood in self.neighborhoods:
             for i in neighborhood:
                 neighborhoods_union.add(i)
 
         remaining = set()
-        for i in range(n):
+        for i in range(X.shape[0]):
             if i not in neighborhoods_union:
                 remaining.add(i)
 
@@ -73,7 +81,7 @@ class FFQS(QueryStrategy):
             try:
                 i = np.random.choice(list(remaining))
 
-                sorted_neighborhoods = sorted(self.neighborhoods, key=lambda nbhd: dist(i, nbhd, X))
+                sorted_neighborhoods = sorted(self.neighborhoods, key=lambda nbhd: np.array([euclidean(X.iloc[i, :], X.iloc[j, :]) for j in nbhd]).min())
 
                 for neighborhood in sorted_neighborhoods:
                     if oracle.query(i, neighborhood[0]):
@@ -104,11 +112,3 @@ class FFQS(QueryStrategy):
                             cl.append((i, j))
 
         return ml, cl
-
-
-def dist(i, S, points):
-    distances = np.array([euclidean(points.iloc[i, :], points.iloc[j, :]) for j in S])
-    return distances.min()
-
-
-

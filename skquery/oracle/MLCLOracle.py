@@ -2,7 +2,7 @@ from ..exceptions import MaximumQueriesExceeded
 
 
 class MLCLOracle:
-    def __init__(self, budget=20, truth=None):
+    def __init__(self, budget=10, truth=None):
         self.queries = 0
         self.budget = budget
         self.truth = truth

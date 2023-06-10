@@ -1,8 +1,11 @@
+import pandas as pd
+
+
 class QueryStrategy:
 
     def __init__(self):
-        self.partition = []
-
-    def fit(self, dataset, partition, oracle):
         pass
+
+    def _check_dataset_type(self, X):
+        return pd.DataFrame(X)
 

@@ -1,10 +1,11 @@
 """
  Active Informative Pairwise Constraint Formulation algorithm from Zhong et al. 2019.
 """
-# Authors : Brice Jacquesson, Matthéo Pailler
+# Authors : Brice Jacquesson, Matthéo Pailler, Aymeric Beauchamp
 
 import pandas as pd
 from sklearn.metrics import pairwise_distances
+from ..exceptions import MaximumQueriesExceeded
 from ..strategy import QueryStrategy
 import numpy as np
 import skfuzzy as fuzz
@@ -12,61 +13,67 @@ import skfuzzy as fuzz
 
 class AIPC(QueryStrategy):
 
-    def __init__(self, nb_centre: int, epsilon: float = 0.05):
+    def __init__(self, epsilon: float = 0.05):
         super().__init__()
-        self.data = None
-        self.epsilon = epsilon * nb_centre
+        self.partition = []
+        self.epsilon = epsilon
         self.centres = None
         self.u = None
         self.d = None
-        self.nb_centre = nb_centre
-        self.budget = 0
 
-    def fit(self, X, partition, oracle):
-        self.budget = oracle.budget
+    def fit(self, X, oracle, **kwargs):
+        X = self._check_dataset_type(X)
 
-        self.data = X
+        if "partition" in kwargs:
+            self.partition = kwargs["partition"]
 
-        self._fuzzy_cmeans()
+        if len(self.partition) > 0:
+            K = len(set(self.partition))
+        elif "n_clusters" in kwargs:
+            K = kwargs["n_clusters"]
+        else:
+            raise ValueError("No cluster number provided")
+        self.epsilon = self.epsilon * K
+        self._fuzzy_cmeans(X, K)
 
         ml, cl = [], []
         constraints = {"ml": ml, "cl": cl}
 
-        nb_queries = 0
-        entropy = self._entropy()  # récupérer les weak samples (voir discord)
+        entropy = self._entropy(X)  # récupérer les weak samples (voir discord)
         weak_samples = []
         for i in range(len(entropy)):  # récupération des weak samples
-            if entropy[i][1] > np.log(self.nb_centre) - self.epsilon:
+            if entropy[i][1] > np.log(K) - self.epsilon:
                 # entropy[1] = entropie
                 weak_samples.append(entropy[i])
         weak_samples.sort(key=lambda x: x[1], reverse=True)  # tri par entropy
 
         strong_samples = self._compute_medoids()  # récupération des strong samples.
 
-        while (nb_queries < self.budget) and (len(weak_samples) > 0):
-            nb_queries += 1
-            xweak = weak_samples.pop()
-            strong_samples.sort(key=lambda x: self._symmetric_relative_entropy(xweak, x))
-            first_strong = strong_samples[0][1]
-            second_strong = strong_samples[1][1]
-            weak = xweak[0]
+        while True:
+            try:
+                xweak = weak_samples.pop()
+                strong_samples.sort(key=lambda x: self._symmetric_relative_entropy(xweak, x, K))
+                first_strong = strong_samples[0][1]
+                second_strong = strong_samples[1][1]
+                weak = xweak[0]
 
-            must_link = oracle.query(weak, second_strong)
-            if must_link:
-                ml.append((weak, second_strong))
-            else:
-                cl.append((weak, second_strong))
-                ml.append((weak, first_strong))
+                if oracle.query(weak, second_strong):
+                    ml.append((weak, second_strong))
+                else:
+                    cl.append((weak, second_strong))
+                    ml.append((weak, first_strong))
+
+            except MaximumQueriesExceeded:
+                break
 
         return constraints
 
-    """
-    return entropy : list of tuple ([x, y], entropy) where x and y are the coordinate of the point and entropy is the entropy of the point.
-    """
-
-    def _entropy(self):
+    def _entropy(self, X):
+        """
+        return entropy : list of tuple ([x, y], entropy) where x and y are the coordinate of the point and entropy is the entropy of the point.
+        """
         entropy = []
-        for j in range(len(self.data)):
+        for j in range(X.shape[0]):
             entropyX = 0
             for i in range(len(self.u)):
                 u_ij = self.u[i][j]
@@ -87,11 +94,11 @@ class AIPC(QueryStrategy):
 
         return medoids
 
-    def _symmetric_relative_entropy(self, xweak, x):
+    def _symmetric_relative_entropy(self, xweak, x, k):
         # a et b correspondent respectivement à la première et seconde somme de l'équation (12) de l'article.
         a = 0
         b = 0
-        for i in range(self.nb_centre):
+        for i in range(k):
             u_xj = self.u[i][x[1]]  # x[1] correspond à l'indice dans la data
             u_xweak = self.u[i][xweak[0]]  # xweak[0] correspond à l'indice dans la data
             a += u_xj * (np.log((np.divide(u_xj, u_xweak))))
@@ -99,15 +106,8 @@ class AIPC(QueryStrategy):
 
         return (a + b) / 2
 
-    def _fuzzy_cmeans(self):
-        datatemp = np.empty((2, len(self.data)), float)
-
-        data = self.data
-        for i in range(len(data)):
-            datatemp[0][i] = data[i][0]
-            datatemp[1][i] = data[i][1]
-
-        fcm = fuzz.cmeans(datatemp, self.nb_centre, 2, 0.05, maxiter=1000)
+    def _fuzzy_cmeans(self, X, k):
+        fcm = fuzz.cmeans(X.T, k, 2, 0.05, maxiter=1000)
         self.centres = fcm[0]
         self.u = fcm[1]
         self.d = fcm[3]

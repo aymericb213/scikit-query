@@ -37,8 +37,8 @@ class Pairwise(QueryStrategy):
 
         return mat
 
-    def fit(self, dataset):
-        return self.active_HACC(dataset)
+    def fit(self, X, *args):
+        return self.active_HACC(X)
 
     def paire(self, point_ic, point_jc, clusters):
         # print(f" ({point_ic},{point_jc})")

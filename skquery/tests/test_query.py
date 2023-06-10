@@ -1,5 +1,5 @@
 import clustbench
-from skquery.pairwise import Random, FFQS, MinMax, NPUincr, AIPC, SASC
+from skquery.pairwise import RandomMLCL, FFQS, MinMax, NPU, AIPC, SASC
 from skquery.oracle import MLCLOracle
 from time import time
 from tqdm import tqdm
@@ -19,9 +19,11 @@ def test_query():
     algo.fit(dataset.data)
 
     # Test all implemented algorithms
-    for strat in [Random, FFQS, MinMax, NPUincr, AIPC, SASC]:
-        qs = strat(dataset.n_clusters[0])
-        qs.fit(dataset.data, algo.labels_, MLCLOracle(truth=labels, budget=10))
+    for strat in [RandomMLCL, FFQS, MinMax, NPU, AIPC, SASC]:
+        qs = strat()
+        constraints = qs.fit(dataset.data, MLCLOracle(truth=labels),
+                             partition=algo.labels_, n_clusters=dataset.n_clusters[0])
+        assert len(constraints) > 0
 
 
 def timing():
@@ -31,8 +33,9 @@ def timing():
     algo = KMeans(n_clusters=dataset.n_clusters[0])
     algo.fit(dataset.data)
 
-    for strat in tqdm([Random, FFQS, MinMax, NPUincr, AIPC, SASC]):
-        qs = strat(dataset.n_clusters[0])
+    for strat in tqdm([RandomMLCL, FFQS, MinMax, NPU, AIPC, SASC]):
+        qs = strat()
         t1 = time()
-        qs.fit(dataset.data, algo.labels_, MLCLOracle(truth=labels, budget=10))
+        qs.fit(dataset.data, MLCLOracle(truth=labels),
+               partition=algo.labels_, n_clusters=dataset.n_clusters[0])
         print(f"{strat.__name__} : {time() - t1} seconds to fit")

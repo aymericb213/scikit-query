@@ -1,31 +1,42 @@
+""" Normalized Point-wise Uncertainty algorithm. Based off the implementation at
+https://github.com/datamole-ai/active-semi-supervised-clustering
+"""
+# Authors : Aymeric Beauchamp
+
 import numpy as np
 from ..exceptions import MaximumQueriesExceeded
 from ..strategy import QueryStrategy
 from sklearn.ensemble import RandomForestClassifier
 
 
-class NPUincr(QueryStrategy):
-    """ Incremental version of NPU. Based off the implementation at
-    https://github.com/datamole-ai/active-semi-supervised-clustering
-    """
+class NPU(QueryStrategy):
 
-    def __init__(self, neighborhoods=None):
+    def __init__(self, neighborhoods=None, clusterer=None):
         super().__init__()
+        self.partition = []
         self.neighborhoods = [] if not neighborhoods or type(neighborhoods) != list else neighborhoods
+        self.clusterer = clusterer
 
-    def fit(self, X, partition, oracle):
+    def fit(self, X, oracle, **kwargs):
+        X = self._check_dataset_type(X)
+
         ml, cl = [], []
         constraints = {"ml": ml, "cl": cl}
-        self.partition = partition
-        n = X.shape[0]
+        if not self.clusterer and "partition" in kwargs:
+            # disregard if a CC algorithm is provided
+            self.partition = kwargs["partition"]
 
-        if not self.neighborhoods:
+        if len(self.neighborhoods == 0):
             # Initialization
-            x_i = np.random.choice(list(range(n)))
+            x_i = np.random.choice(list(range(X.shape[0])))
             self.neighborhoods.append([x_i])
 
         while True:
             try:
+                if self.clusterer:
+                    # only works with CC algorithms from active-semi-supervised-clustering library
+                    self.clusterer.fit(X, ml=ml, cl=cl)
+                    self.partition = self.clusterer.labels_
                 x_i, p_i = self._most_informative(X)
 
                 sorted_neighborhoods = list(zip(*reversed(sorted(zip(p_i, self.neighborhoods)))))[1]
