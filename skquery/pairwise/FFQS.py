@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
-from scipy.spatial.distance import euclidean
-from ..exceptions import MaximumQueriesExceeded
+from scipy.spatial.distance import pdist, squareform
+from ..exceptions import EmptyBudgetError, QueryNotFoundError
 from ..strategy import QueryStrategy
 
 
@@ -10,22 +10,24 @@ class FFQS(QueryStrategy):
         super().__init__()
         self.partition = []
         self.neighborhoods = [] if not neighborhoods or type(neighborhoods) != list else neighborhoods
+        self.pdist = pd.DataFrame()
 
     def fit(self, X, oracle, **kwargs):
         X = self._check_dataset_type(X)
-        if "partition" in kwargs:
-            self.partition = kwargs["partition"]
+        K = self._get_number_of_clusters(**kwargs)
 
-        if len(self.partition) > 0:
-            K = len(set(self.partition))
-        elif "n_clusters" in kwargs:
-            K = kwargs["n_clusters"]
+        if "pdist" in kwargs and kwargs["pdist"] is not None:
+            self.pdist = pd.DataFrame(kwargs["pdist"])
         else:
-            raise ValueError("No cluster number provided")
+            # Precompute pairwise distances for farthest-first traversal
+            self.pdist = pd.DataFrame(squareform(pdist(X)))
 
-        if 0 <= len(self.neighborhoods) < K:
+        # If K is not known, only Explore is run
+        if K == 0 or 0 <= len(self.neighborhoods) < K:
             self._explore(X, K, oracle)
-        self._consolidate(X, oracle)
+        # Consolidate if Explore is done and budget is not depleted
+        if oracle.queries < oracle.budget:
+            self._consolidate(X, oracle)
 
         ml, cl = self.get_constraints_from_neighborhoods()
         constraints = {"ml": ml, "cl": cl}
@@ -33,55 +35,56 @@ class FFQS(QueryStrategy):
 
     def _explore(self, X, k, oracle):
         traversed = []
-
         if not self.neighborhoods:
+            # Initialization
             x = np.random.choice(X.shape[0])
             self.neighborhoods.append([x])
             traversed.append(x)
+        else:
+            # Retrieving past traversed points from neighborhoods
+            traversed = [x for nbhd in self.neighborhoods for x in nbhd]
 
-        while len(self.neighborhoods) < k:
+        unqueried_indices = list(set(range(X.shape[0])) - set(traversed))
+
+        # Run until budget runout if k is not known
+        while k == 0 or len(self.neighborhoods) < k:
             try:
-                max_distance = 0
-                farthest = None
+                if unqueried_indices == set():
+                    raise QueryNotFoundError
 
-                for i in range(X.shape[0]):
-                    if i not in traversed:
-                        distance = np.array([euclidean(X.iloc[i, :], X.iloc[j, :]) for j in traversed]).min()
-                        if distance > max_distance:
-                            max_distance = distance
-                            farthest = i
+                # Farthest point : max distance to the set of traversed points
+                # d(point, set) = min([d(point, x) for x in set])
+                farthest = self.pdist.iloc[unqueried_indices, traversed].min(axis=1).idxmax()
 
+                # Querying neighborhood of farthest point
                 new_neighborhood = True
                 for neighborhood in self.neighborhoods:
                     if oracle.query(farthest, neighborhood[0]):
                         neighborhood.append(farthest)
                         new_neighborhood = False
                         break
-
                 if new_neighborhood:
                     self.neighborhoods.append([farthest])
 
                 traversed.append(farthest)
+                unqueried_indices.remove(farthest)
 
-            except MaximumQueriesExceeded:
+            except (EmptyBudgetError, QueryNotFoundError):
                 break
 
     def _consolidate(self, X, oracle):
-        neighborhoods_union = set()
-        for neighborhood in self.neighborhoods:
-            for i in neighborhood:
-                neighborhoods_union.add(i)
+        neighborhoods_union = set([x for nbhd in self.neighborhoods for x in nbhd])
 
-        remaining = set()
-        for i in range(X.shape[0]):
-            if i not in neighborhoods_union:
-                remaining.add(i)
+        unqueried_indices = set(range(X.shape[0])) - neighborhoods_union
 
         while True:
             try:
-                i = np.random.choice(list(remaining))
+                if unqueried_indices == set():
+                    raise QueryNotFoundError
 
-                sorted_neighborhoods = sorted(self.neighborhoods, key=lambda nbhd: np.array([euclidean(X.iloc[i, :], X.iloc[j, :]) for j in nbhd]).min())
+                i = np.random.choice(list(unqueried_indices))
+
+                sorted_neighborhoods = sorted(self.neighborhoods, key=lambda nbhd: self.pdist.iloc[i, nbhd].min())
 
                 for neighborhood in sorted_neighborhoods:
                     if oracle.query(i, neighborhood[0]):
@@ -89,9 +92,9 @@ class FFQS(QueryStrategy):
                         break
 
                 neighborhoods_union.add(i)
-                remaining.remove(i)
+                unqueried_indices.remove(i)
 
-            except MaximumQueriesExceeded:
+            except (EmptyBudgetError, QueryNotFoundError):
                 break
 
     def get_constraints_from_neighborhoods(self):
@@ -109,5 +112,4 @@ class FFQS(QueryStrategy):
                     for i in neighborhood:
                         for j in other_neighborhood:
                             cl.append((i, j))
-
         return ml, cl

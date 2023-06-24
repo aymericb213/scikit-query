@@ -5,7 +5,7 @@
 
 import pandas as pd
 from sklearn.metrics import pairwise_distances
-from ..exceptions import MaximumQueriesExceeded
+from ..exceptions import EmptyBudgetError
 from ..strategy import QueryStrategy
 import numpy as np
 import skfuzzy as fuzz
@@ -27,12 +27,7 @@ class AIPC(QueryStrategy):
         if "partition" in kwargs:
             self.partition = kwargs["partition"]
 
-        if len(self.partition) > 0:
-            K = len(set(self.partition))
-        elif "n_clusters" in kwargs:
-            K = kwargs["n_clusters"]
-        else:
-            raise ValueError("No cluster number provided")
+        K = self._get_number_of_clusters(**kwargs)
         self.epsilon = self.epsilon * K
         self._fuzzy_cmeans(X, K)
 
@@ -63,7 +58,7 @@ class AIPC(QueryStrategy):
                     cl.append((weak, second_strong))
                     ml.append((weak, first_strong))
 
-            except MaximumQueriesExceeded:
+            except EmptyBudgetError:
                 break
 
         return constraints

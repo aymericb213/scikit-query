@@ -1,4 +1,4 @@
-from ..exceptions import MaximumQueriesExceeded
+from ..exceptions import EmptyBudgetError
 
 
 class MLCLOracle:
@@ -17,4 +17,4 @@ class MLCLOracle:
                 return self.truth[i] == self.truth[j]
             return input(f"Should instances {i} and {j} be in the same cluster ? (y/n) ").strip().lower() == "y"
         else:
-            raise MaximumQueriesExceeded
+            raise EmptyBudgetError

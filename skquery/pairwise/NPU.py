@@ -4,7 +4,7 @@ https://github.com/datamole-ai/active-semi-supervised-clustering
 # Authors : Aymeric Beauchamp
 
 import numpy as np
-from ..exceptions import MaximumQueriesExceeded
+from ..exceptions import EmptyBudgetError
 from ..strategy import QueryStrategy
 from sklearn.ensemble import RandomForestClassifier
 
@@ -70,7 +70,7 @@ class NPU(QueryStrategy):
 
                     self.neighborhoods.append([x_i])
 
-            except MaximumQueriesExceeded:
+            except EmptyBudgetError:
                 break
 
         return constraints

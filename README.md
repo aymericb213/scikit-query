@@ -37,7 +37,7 @@ constraints = qs.fit(dataset, oracle)
 
 **Must-link** and **cannot-link** (ML/CL) constraints, also referred to as pairwise constraints,
 establish a relation between two data points : they must be in the same cluster (must-link)
-or in separate clusters (cannot-link).
+or in separate clusters (cannot-link). These are most widely studied constraints for clustering.
 
 ## Algorithms
 
@@ -64,6 +64,6 @@ scikit-query is developed on Python >= 3.10, and requires the following librarie
 
 ## Contributors
 
-FFQS, MinMax and NPU are based off the original implementation of Jakub Švehla and changed for library consistency. 
+FFQS, MinMax and NPU are based upon Jakub Švehla's implementation. 
 Other algorithms have been implemented by Aymeric Beauchamp or his students from the University of Orléans :
 - Salma Badri, Elis Ishimwe, Brice Jacquesson, Matthéo Pailler (2023)
