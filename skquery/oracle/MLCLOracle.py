@@ -1,4 +1,4 @@
-from ..exceptions import EmptyBudgetError
+from ..exceptions import EmptyBudgetError, NoAnswerError
 
 
 class MLCLOracle:
@@ -15,6 +15,10 @@ class MLCLOracle:
             self.queries += 1
             if self.truth is not None:
                 return self.truth[i] == self.truth[j]
-            return input(f"Should instances {i} and {j} be in the same cluster ? (y/n) ").strip().lower() == "y"
+            answer = input(f"Should instances {i} and {j} be in the same cluster ? (yes (y)/no (n)/pass (p)) ").strip().lower()
+            if answer == "p":
+                raise NoAnswerError
+            else:
+                return answer == "y"
         else:
             raise EmptyBudgetError

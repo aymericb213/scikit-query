@@ -36,7 +36,6 @@ def test_query():
         constraints = {"ml": [], "cl": []}
         nbhds = None
         pdists = None
-        sims = None
         t_qs = []
         for i in range(n_iter):
             algo = COPKMeans(n_clusters=dataset.n_clusters[0])
@@ -44,17 +43,19 @@ def test_query():
 
             if strat == RandomMLCL:
                 qs = strat()
+            elif strat in [FFQS, MinMax]:
+                qs = strat(neighborhoods=nbhds, distances=pdists)
             else:
                 qs = strat(neighborhoods=nbhds)
             t1 = time()
             constraints = qs.fit(dataset.data, MLCLOracle(truth=labels, budget=budget),
-                                 partition=algo.labels_, pdist=pdists)
+                                 partition=algo.labels_)
             t_qs.append(time() - t1)
 
             assert len(constraints) > 0
             if strat in [FFQS, MinMax, NPU]:
                 nbhds = qs.neighborhoods
             if strat in [FFQS, MinMax]:
-                pdists = qs.pdist
+                pdists = qs.p_dists
         #TODO: too much clutter, make tests for each alg
         print(f"\n{strat.__name__} incremental : {sum(t_qs)} s (breakdown: {t_qs})")

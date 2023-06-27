@@ -1,4 +1,4 @@
-__all__ = ["EmptyBudgetError", "QueryNotFoundError"]
+__all__ = ["EmptyBudgetError", "QueryNotFoundError", "NoAnswerError"]
 
 
 class EmptyBudgetError(Exception):
@@ -10,4 +10,10 @@ class EmptyBudgetError(Exception):
 class QueryNotFoundError(Exception):
     """
     Exception to be raised when an active method is unable to perform further queries, e.g. when all points in the dataset have been selected for query.
+    """
+
+
+class NoAnswerError(Exception):
+    """
+    Exception to be raised when the oracle doesn't answer a query, e.g. when they don't know what to answer.
     """
