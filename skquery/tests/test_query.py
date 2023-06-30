@@ -4,11 +4,6 @@ from skquery.oracle import MLCLOracle
 from active_semi_clustering import COPKMeans
 from time import time
 from tqdm import tqdm
-try:
-    from sklearnex import patch_sklearn
-    patch_sklearn()
-except ModuleNotFoundError:
-    pass
 
 
 def test_query():

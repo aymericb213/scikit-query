@@ -4,9 +4,10 @@ https://github.com/datamole-ai/active-semi-supervised-clustering
 # Authors : Aymeric Beauchamp
 
 import numpy as np
-from ..exceptions import EmptyBudgetError
+from ..exceptions import EmptyBudgetError, QueryNotFoundError
 from ..strategy import QueryStrategy
 from sklearn.ensemble import RandomForestClassifier
+from scipy.stats import entropy, rv_discrete
 
 
 class NPU(QueryStrategy):
@@ -70,7 +71,7 @@ class NPU(QueryStrategy):
 
                     self.neighborhoods.append([x_i])
 
-            except EmptyBudgetError:
+            except (EmptyBudgetError, QueryNotFoundError):
                 break
 
         return constraints
@@ -79,13 +80,11 @@ class NPU(QueryStrategy):
         n = X.shape[0]
         nb_neighborhoods = len(self.neighborhoods)
 
-        neighborhoods_union = set()
-        for neighborhood in self.neighborhoods:
-            for i in neighborhood:
-                neighborhoods_union.add(i)
-
+        neighborhoods_union = set([x for nbhd in self.neighborhoods for x in nbhd])
         unqueried_indices = set(range(n)) - neighborhoods_union
 
+        if unqueried_indices == set():
+            raise QueryNotFoundError
         if nb_neighborhoods <= 1:
             return np.random.choice(list(unqueried_indices)), [1]
 
@@ -118,11 +117,12 @@ class NPU(QueryStrategy):
 
             if not np.any(p[x_i, ] == 1):
                 positive_p_i = p[x_i, p[x_i, ] > 0]
-                uncertainties[x_i] = -(positive_p_i * np.log2(positive_p_i)).sum()
-                expected_costs[x_i] = (positive_p_i * range(1, len(positive_p_i) + 1)).sum()
+                uncertainties[x_i] = entropy(positive_p_i, base=2)
+                expected_costs[x_i] = rv_discrete(values=(range(1, len(positive_p_i) + 1), positive_p_i)).expect()
             else:
+                # case where neighborhood affectation is certain
                 uncertainties[x_i] = 0
-                expected_costs[x_i] = 1  # ?
+                expected_costs[x_i] = 1
 
         normalized_uncertainties = uncertainties / expected_costs
 

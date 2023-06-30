@@ -14,6 +14,8 @@ class MinMax(FFQS):
         # Compute width σ of Gaussian kernel (20% as per the article)
         percent = 20
         assert 0 < percent <= 100
+        # Here squareform makes square-form -> vector-form transformation
+        # Gets the distribution of unique pairwise distances
         kernel_width = np.percentile(squareform(self.p_dists), percent)
 
         while True:
