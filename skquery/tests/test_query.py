@@ -18,7 +18,7 @@ def test_query():
     for strat in tqdm(algorithms):
         qs = strat()
         if strat == NPU:
-            qs = strat(clusterer=COPKMeans(n_clusters=dataset.n_clusters[0]))
+            qs = strat(cc_alg=COPKMeans(n_clusters=dataset.n_clusters[0]))
         t1 = time()
         constraints = qs.fit(dataset.data, MLCLOracle(truth=labels, budget=budget),
                              n_clusters=dataset.n_clusters[0])
