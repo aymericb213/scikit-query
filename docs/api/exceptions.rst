@@ -1,0 +1,2 @@
+.. automodule:: skquery.exceptions
+    :members:
