@@ -16,9 +16,8 @@ release = '0.1.1'
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here.
-import pathlib
 import sys
-sys.path.insert(0, "")
+sys.path.insert(0, "..")
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
@@ -36,7 +35,7 @@ exclude_patterns = []
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = "pydata_sphinx_theme"
+html_theme = "alabaster"
 html_static_path = ['_static']
 
 # EPUB options
