@@ -7,7 +7,7 @@ class MLCLOracle:
 
     Parameters
     ----------
-    budget : int
+    budget : int, default=10
         Maximum number of queries the oracle will answer.
     truth : array-like, default=None
         Ground truth labeling that emulates a human oracle.
@@ -28,7 +28,7 @@ class MLCLOracle:
 
     def query(self, i, j):
         """
-        Query the oracle to find out whether i and j should be must-linked
+        Query the oracle to find out whether two points should be in the same cluster.
 
         Parameters
         ----------
@@ -39,8 +39,13 @@ class MLCLOracle:
 
         Returns
         -------
-        answer : str
-            Yes, no, or "don't know" answer to the query.
+        answer : bool
+            Answer to the query.
+
+        Raises
+        ------
+        NoAnswerError
+            If the oracle doesn't give an answer, i.e. they don't know what to answer.
         """
         if self.queries < self.budget:
             self.queries += 1
