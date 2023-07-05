@@ -14,19 +14,11 @@ Welcome to scikit-query's documentation!
 
    This project is under active development.
 
-
-
 .. toctree::
    :maxdepth: 1
    :caption: API documentation:
 
+   api/pairwise
    api/strategy
    api/oracle
    api/exceptions
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Methods:
-
-   api/pairwise
-
