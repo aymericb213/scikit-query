@@ -11,41 +11,146 @@ import skfuzzy as fuzzy
 
 
 class AIPC(QueryStrategy):
+    """
+    Active Informative Pairwise Constraint Formulation algorithm [1]_.
 
-    def __init__(self, epsilon: float = 0.05):
+    Selects pairwise constraints between strong and weak samples,
+    as defined according to Shannon entropy based on fuzzy clustering.
+
+    Parameters
+    ----------
+    epsilon : float, default=0.
+        Threshold value for the entropy of weak samples.
+        By default, ``epsilon`` is computed during fit.
+
+    Attributes
+    ----------
+    epsilon : float
+        Threshold value for the entropy of weak samples.
+        The value can be given at initialization,
+        otherwise it is computed during fit.
+    fuzzy_partition : array-like
+        Soft partition of the dataset computed by fuzzy c-means clustering.
+
+    References
+    ----------
+    .. [1] Zhong, G., Deng, X., Shengbing, X. Active Informative
+           Pairwise Constraint Formulation Algorithm for Constraint-Based
+           Clustering. 2019. IEEE Access Volume 7.
+    """
+    def __init__(self, epsilon=0.):
         super().__init__()
-        self.partition = []
         self.epsilon = epsilon
         self.fuzzy_partition = None
-        self.p_dists = None
 
-    def fit(self, X, oracle, **kwargs):
+    def fit(self, X, oracle, partition=None, n_clusters=None):
+        """
+        Select pairwise constraints with AIPC.
+
+        Parameters
+        ----------
+        X : array-like
+            Instances to use for query.
+        oracle : callable
+            Source of background knowledge able to answer the queries.
+        partition : array-like
+            Existing partition of the data.
+            Used to define the number of clusters.
+        n_clusters : int
+            Number of clusters to find.
+
+        Returns
+        -------
+        constraints : dict of lists
+            ML and CL constraints between strong and weak samples.
+        """
         X = self._check_dataset_type(X)
+        K = self._get_number_of_clusters(partition, n_clusters)
 
-        if "partition" in kwargs:
-            self.partition = kwargs["partition"]
+        p_dists = self._pre_clustering(X, K)
 
-        K = self._get_number_of_clusters(**kwargs)
-        self.epsilon = self.epsilon * K
+        entropies = np.array([entropy([self.fuzzy_partition[k][i] for k in range(K)]) for i in range(X.shape[0])])
 
-        self._pre_clustering(X, K)
+        assert self.epsilon >= 0.
+        if self.epsilon == 0.:
+            self._epsilon(entropies, K, oracle.budget)
 
-        return self._marking(X, K, oracle)
+        return self._marking(entropies, K, p_dists, oracle)
 
-    def _pre_clustering(self, X, k):
-        cntr, u, u0, d, jm, p, fpc = fuzzy.cmeans(X.T, k, 2, 0.05, maxiter=1000)
+    def _epsilon(self, entropies, k, n_queries):
+        """
+        Computes the threshold value of Shannon entropy
+        over which a sample is considered weak.
+
+        Parameters
+        ----------
+        entropies : array-like
+            Shannon entropy of every point in the dataset.
+        k : int
+            Number of clusters used for fuzzy clustering.
+        n_queries : int
+            Number of queries to ask, i.e. the oracle's budget.
+        """
+        desc_entropies = np.flip(np.sort(entropies))
+        self.epsilon = np.log(k) - desc_entropies[n_queries]
+
+    def _pre_clustering(self, X, k, fuzziness=2, tolerance=10**-5, max_iter=100):
+        """
+        Computes a soft partition of data with
+        fuzzy c-means clustering.
+
+        Parameters
+        ----------
+        X : array-like
+            Instances to use for query.
+        k : int
+            Number of clusters used for fuzzy clustering.
+        fuzziness : int, default=2
+            Degree of fuzziness.
+        tolerance : int, default=10e-5
+            Stopping criterion : minimal difference between two iterations of cmeans.
+        max_iter : int, default=100
+            Maximum number of c-means iterations.
+
+        Notes
+        -----
+        Default values for ``fuzziness``, ``tolerance`` and ``max_iter``
+        replicate the experimental setup in the article.
+        """
+        cntr, u, u0, d, jm, p, fpc = fuzzy.cmeans(X.T, k, fuzziness, tolerance, maxiter=max_iter)
         self.fuzzy_partition = u
-        self.p_dists = d
+        return d
 
-    def _marking(self, X, k, oracle):
+    def _marking(self, entropies, k, p_dists, oracle):
+        """
+        Selects pairwise constraints based on
+        symmetric relative entropy between strong and
+        weak samples.
+
+        Params
+        ------
+        entropies : array-like
+            Shannon entropy of every point in the dataset.
+        k : int
+            Number of clusters used for fuzzy clustering.
+        p_dists : array-like
+            Euclidean distance matrix between instances and fuzzy centers.
+        oracle : callable
+            Source of background knowledge able to answer the queries.
+
+        Returns
+        -------
+        constraints : dict of lists
+            Selected pairwise constraints.
+        """
         ml, cl = [], []
         constraints = {"ml": ml, "cl": cl}
 
-        entropies = np.array([entropy([self.fuzzy_partition[k][i] for k in range(k)]) for i in range(X.shape[0])])  # récupérer les weak samples (voir discord)
         weak_samples = np.where(entropies > np.log(k) - self.epsilon)[0]
         sorted_weak = reversed(sorted(weak_samples, key=lambda x: entropies[x]))
 
-        strong_samples = self._compute_medoids()  # récupération des strong samples.
+        # Medoids of fuzzy cluster centers
+        strong_samples = [(i, np.argmin(p_dists[i])) for i in range(k)]
 
         while True:
             try:
@@ -74,19 +179,23 @@ class AIPC(QueryStrategy):
         return constraints
 
     def _symmetric_relative_entropy(self, xweak, x, K):
+        """
+        Computes symmetric relative entropy between a weak sample and a strong one.
+
+        Parameters
+        ----------
+        xweak : int
+            Index of weak sample.
+        x : int
+            Index of strong sample.
+        K : int
+            Number of clusters in fuzzy clustering.
+
+        Returns
+        -------
+        s_entropy : float
+            Symmetric relative entropy between the weak and strong samples.
+        """
         u_xj = [self.fuzzy_partition[k][x[1]] for k in range(K)]  # x[1] correspond à l'indice dans la data
         u_xweak = [self.fuzzy_partition[k][xweak] for k in range(K)]
         return (entropy(u_xj, u_xweak) + entropy(u_xweak, u_xj)) / 2
-
-    def _compute_medoids(self):
-        medoids = []  # liste de tuple (indice du centre, indice du medoid)
-        for i in range(len(self.p_dists)):
-            dist_min = self.p_dists[i][0]
-            minInd = 0
-            for ind, e in enumerate(self.p_dists[i]):
-                if e < dist_min:
-                    dist_min = e
-                    minInd = ind
-            medoids.append((i, minInd))
-
-        return medoids

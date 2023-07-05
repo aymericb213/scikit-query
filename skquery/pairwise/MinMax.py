@@ -6,7 +6,51 @@ from .FFQS import FFQS
 
 
 class MinMax(FFQS):
+    """
+    Min-max Farthest First Query Selection [1]_.
+
+    FFQS with modified Consolidate step with similarity
+    for constraint selection.
+
+    Parameters
+    ----------
+    neighborhoods : list of lists, default=None
+        Optional precomputed neighborhoods of the data.
+        This can be used as a warm start, e.g. to skip the Explore phase.
+    distances : array-like, default=None
+        Euclidean pairwise distance matrix of the data.
+        If none given, it will be computed during fit.
+
+    Attributes
+    ----------
+    neighborhoods : list of lists
+        Points whose cluster affectation is certified by the answers of the oracle to the queries.
+        Each list contains points belonging to the same cluster.
+    p_dists : array-like
+        Euclidean pairwise distance matrix of the data.
+    unknown : set
+        Points whose affectation has been queried but remain unknown, i.e. the oracle
+        couldn't answer the query.
+
+    References
+    ----------
+    .. [1] Mallapragada, P. K., Jin, R., Jain, A. K. Active query selection for
+           semi-supervised clustering. 2008. 19th International Conference on Pattern Recognition
+           (ICPR). ISBN 978-1-4244-2174-9.
+    """
     def _consolidate(self, X, oracle):
+        """
+        Consolidate phase of MMFFQS.
+        Select the point minimal similarity to its most similar point
+        in the skeleton.
+
+        Parameters
+        ----------
+        X : array-like
+            Instances to use for query.
+        oracle : callable
+            Source of background knowledge able to answer the queries.
+        """
         skeleton = set([x for nbhd in self.neighborhoods for x in nbhd])
 
         unqueried_indices = set(range(X.shape[0])) - skeleton - self.unknown

@@ -4,28 +4,92 @@ https://github.com/datamole-ai/active-semi-supervised-clustering
 # Authors : Aymeric Beauchamp
 
 import numpy as np
-from ..exceptions import EmptyBudgetError, QueryNotFoundError
+from ..exceptions import EmptyBudgetError, QueryNotFoundError, NoAnswerError
 from ..strategy import QueryStrategy
 from sklearn.ensemble import RandomForestClassifier
 from scipy.stats import entropy, rv_discrete
 
 
 class NPU(QueryStrategy):
+    """
+    Normalized Point-based Uncertainty algorithm [1]_.
+    
+    Uncertainty sampling using Shannon entropy
+    based on an existing partition, normalized by
+    the expected number of queries for a given point.
+    
+    Parameters
+    ----------
+    neighborhoods : list of lists, default=None
+        Optional precomputed neighborhoods of the data.
+        This can be used as a warm start, e.g. for incremental constrained clustering.
+    cc_alg : callable, default=None
+        Constrained clustering algorithm to use in tandem with
+        the selection procedure.
+        Not needed if a partition is given during fit.
+        
+    Attributes
+    ----------
+    partition : array-like
+        Partition of the dataset.
+    neighborhoods : list of lists
+        Points whose cluster affectation is certified by the answers of the oracle to the queries.
+        Each list contains points belonging to the same cluster.
+    cc_alg : callable
+        Constrained clustering algorithm used to compute a partition
+        using the selected constraints.
+    unknown : set
+        Points whose affectation has been queried but remain unknown, i.e. the oracle
+        couldn't answer the query.
+    
+    Notes
+    -----
+    This implementation of NPU works either with a constrained clustering algorithm or
+    by giving a partition as argument of the ``fit`` method. In the former case,
+    only algorithms from ``active-semi-supervised-clustering`` library are supported.
 
-    def __init__(self, neighborhoods=None, clusterer=None):
+    References
+    ----------
+    .. [1] Xiong, S., Azimi, J., Fern, X. Z. Active Learning of Constraints for
+           Semi-Supervised Clustering. 2013. IEEE Transactions on Knowledge and
+           Data Engineering Volume 26, 1, pp 43-54.
+    """
+    def __init__(self, neighborhoods=None, cc_alg=None):
         super().__init__()
         self.partition = []
         self.neighborhoods = [] if not neighborhoods or type(neighborhoods) != list else neighborhoods
-        self.clusterer = clusterer
+        self.cc_alg = cc_alg
+        self.unknown = set()
 
-    def fit(self, X, oracle, **kwargs):
+    def fit(self, X, oracle, partition=None, n_clusters=None):
+        """Select pairwise constraints with NPU.
+
+        Parameters
+        ----------
+        X : array-like
+            Instances to use for query.
+        oracle : callable
+            Source of background knowledge able to answer the queries.
+        partition : array-like
+            Existing partition of the data.
+            Not used if a clustering algorithm has been defined at init.
+        n_clusters : Ignored
+            Not used, present for API consistency.
+
+        Returns
+        -------
+        constraints : dict of lists
+            ML and CL constraints derived from the neighborhoods.
+        """
         X = self._check_dataset_type(X)
 
         ml, cl = [], []
         constraints = {"ml": ml, "cl": cl}
-        if not self.clusterer and "partition" in kwargs:
-            # disregard if a CC algorithm is provided
-            self.partition = kwargs["partition"]
+        if not self.cc_alg:
+            if partition is not None:
+                self.partition = partition
+            else:
+                raise AttributeError("NPU requires either a CC algorithm or a partition.")
 
         if len(self.neighborhoods) == 0:
             # Initialization
@@ -34,42 +98,43 @@ class NPU(QueryStrategy):
 
         while True:
             try:
-                if self.clusterer is not None:
-                    # only works with CC algorithms from active-semi-supervised-clustering library
-                    self.clusterer.fit(X.to_numpy(), ml=ml, cl=cl)
-                    self.partition = self.clusterer.labels_
+                if self.cc_alg is not None:
+                    self.cc_alg.fit(X.to_numpy(), ml=ml, cl=cl)
+                    self.partition = self.cc_alg.labels_
 
                 x_i, p_i = self._most_informative(X)
 
                 sorted_neighborhoods = list(zip(*reversed(sorted(zip(p_i, self.neighborhoods)))))[1]
-                #  print(x_i, self.neighborhoods, p_i, sorted_neighborhoods)
 
                 must_link_found = False
 
                 # The oracle determines the neighborhood of x_i
-                for neighborhood in sorted_neighborhoods:
+                try:
+                    for neighborhood in sorted_neighborhoods:
 
-                    must_linked = oracle.query(x_i, neighborhood[0])
-                    if must_linked:
-                        for x_j in neighborhood:
-                            ml.append((x_i, x_j))
+                        must_linked = oracle.query(x_i, neighborhood[0])
+                        if must_linked:
+                            for x_j in neighborhood:
+                                ml.append((x_i, x_j))
 
-                        for other_neighborhood in self.neighborhoods:
-                            if neighborhood != other_neighborhood:
-                                for x_j in other_neighborhood:
-                                    cl.append((x_i, x_j))
+                            for other_neighborhood in self.neighborhoods:
+                                if neighborhood != other_neighborhood:
+                                    for x_j in other_neighborhood:
+                                        cl.append((x_i, x_j))
 
-                        neighborhood.append(x_i)
-                        must_link_found = True
-                        break
-                        # TODO should we add the cannot-link in case the algorithm stops before it queries all neighborhoods?
+                            neighborhood.append(x_i)
+                            must_link_found = True
+                            break
+                            # TODO should we add the cannot-link in case the algorithm stops before it queries all neighborhoods?
 
-                if not must_link_found:
-                    for neighborhood in self.neighborhoods:
-                        for x_j in neighborhood:
-                            cl.append((x_i, x_j))
+                    if not must_link_found:
+                        for neighborhood in self.neighborhoods:
+                            for x_j in neighborhood:
+                                cl.append((x_i, x_j))
 
-                    self.neighborhoods.append([x_i])
+                        self.neighborhoods.append([x_i])
+                except NoAnswerError:
+                    self.unknown.add(x_i)
 
             except (EmptyBudgetError, QueryNotFoundError):
                 break
@@ -77,11 +142,28 @@ class NPU(QueryStrategy):
         return constraints
 
     def _most_informative(self, X, n_trees=50):
+        """
+        Selects the most informative instance in the dataset
+        by learning a random forest from the partition and
+        computing entropy based on leaf pairings.
+        
+        Parameters
+        ----------
+        X : array-like
+            Instances to use for query.
+        n_trees : int, default=50
+            Number of estimators in the random forest.
+        
+        Returns
+        -------
+        x_i, p_i : int, array-like
+            Index of the most informative point and its probability distribution.
+        """
         n = X.shape[0]
         nb_neighborhoods = len(self.neighborhoods)
 
         neighborhoods_union = set([x for nbhd in self.neighborhoods for x in nbhd])
-        unqueried_indices = set(range(n)) - neighborhoods_union
+        unqueried_indices = set(range(n)) - neighborhoods_union - self.unknown
 
         if unqueried_indices == set():
             raise QueryNotFoundError

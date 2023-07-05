@@ -6,26 +6,74 @@ from ..strategy import QueryStrategy
 
 
 class FFQS(QueryStrategy):
+    """
+    Farthest First Query Selection [1]_.
+
+    Explores the data with farthest-first traversal to discover the cluster structure,
+    then consolidates the skeleton with random selection.
+
+    Parameters
+    ----------
+    neighborhoods : list of lists, default=None
+        Optional precomputed neighborhoods of the data.
+        This can be used as a warm start, e.g. to skip the Explore phase.
+    distances : array-like, default=None
+        Euclidean pairwise distance matrix of the data.
+        If none given, it will be computed during fit.
+
+    Attributes
+    ----------
+    neighborhoods : list of lists
+        Points whose cluster affectation is certified by the answers of the oracle to the queries.
+        Each list contains points belonging to the same cluster.
+    p_dists : array-like
+        Euclidean pairwise distance matrix of the data.
+    unknown : set
+        Points whose affectation has been queried but remain unknown, i.e. the oracle
+        couldn't answer the query.
+
+    References
+    ----------
+    .. [1] Basu, S., Banerjee, A., Mooney, R. Active Semi-Supervision for
+           Pairwise Constrained Clustering. 2004. Proceedings of the 2004 SIAM International
+           Conference on Data Mining. ISBN 978-1-61197-274-0, pp. 333-344.
+    """
     def __init__(self, neighborhoods=None, distances=None):
         super().__init__()
         self.neighborhoods = [] if not neighborhoods or type(neighborhoods) != list else neighborhoods
         self.p_dists = [] if distances is None or distances.shape == 0 else distances
         self.unknown = set()
 
-    def fit(self, X, oracle, **kwargs):
-        """Query the oracle with the FFQS scheme
+    def fit(self, X, oracle, partition=None, n_clusters=None):
+        """Select pairwise constraints with the FFQS scheme.
+
+        Parameters
+        ----------
+        X : array-like
+            Instances to use for query.
+        oracle : callable
+            Source of background knowledge able to answer the queries.
+        partition : array-like, default=None
+            Existing partition of the data that provides the number of clusters to find.
+            It has priority over ``n_clusters``, i.e. ``n_clusters`` will not be
+            taken into account if a partition is passed.
+        n_clusters : int, default=None
+            Number of clusters to find.
+            If none given, only the Explore phase will be used.
+
+        Returns
+        -------
+        constraints : dict of lists
+            ML and CL constraints derived from the neighborhoods.
         """
         X = self._check_dataset_type(X)
-        K = self._get_number_of_clusters(**kwargs)
+        K = self._get_number_of_clusters(partition, n_clusters)
 
         if len(self.p_dists) == 0:
-            # Precompute pairwise distances for farthest-first traversal
             self.p_dists = pd.DataFrame(squareform(pdist(X)))
 
-        # If K is not known, only Explore is run
         if K == 0 or 0 <= len(self.neighborhoods) < K:
             self._explore(X, K, oracle)
-        # Consolidate if Explore is done and budget is not depleted
         if oracle.queries < oracle.budget:
             self._consolidate(X, oracle)
 
@@ -34,6 +82,20 @@ class FFQS(QueryStrategy):
         return constraints
 
     def _explore(self, X, k, oracle):
+        """
+        Explore phase of FFQS.
+        Farthest-first traversal until k clusters are found or
+        the budget is depleted.
+
+        Parameters
+        ----------
+        X : array-like
+            Instances to use for query.
+        k : int
+            Number of clusters to find.
+        oracle : callable
+            Source of background knowledge able to answer the queries.
+        """
         traversed = []
         if not self.neighborhoods:
             # Initialization
@@ -76,6 +138,18 @@ class FFQS(QueryStrategy):
                 break
 
     def _consolidate(self, X, oracle):
+        """
+        Consolidate phase of FFQS.
+        Pick points at random and query them against the k neighborhoods
+        found in Explore.
+
+        Parameters
+        ----------
+        X : array-like
+            Instances to use for query.
+        oracle : callable
+            Source of background knowledge able to answer the queries.
+        """
         neighborhoods_union = set([x for nbhd in self.neighborhoods for x in nbhd])
 
         unqueried_indices = set(range(X.shape[0])) - neighborhoods_union - self.unknown
@@ -104,6 +178,16 @@ class FFQS(QueryStrategy):
                 break
 
     def get_constraints_from_neighborhoods(self):
+        """
+        Derives constraints from the neighborhood structure :
+        ML between all pairs of points in the same neighborhood and
+        CL between all pairs of points in separate neighborhoods
+
+        Returns
+        -------
+        ml, cl : list of tuples
+            Pairwise constraints derived from the neighborhoods.
+        """
         ml, cl = [], []
 
         for neighborhood in self.neighborhoods:

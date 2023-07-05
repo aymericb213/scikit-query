@@ -3,10 +3,28 @@ from ..strategy import QueryStrategy
 
 
 class RandomMLCL(QueryStrategy):
+    """
+    Random sampling of pairwise constraints.
+    """
     def __init__(self):
         super().__init__()
 
-    def fit(self, X, oracle, **kwargs):
+    def fit(self, X, oracle, partition=None, n_clusters=None):
+        """
+        Selects pairwise constraints randomly.
+
+        Parameters
+        ----------
+        X : array-like
+            Instances to use for query.
+        oracle : callable
+            Source of background knowledge able to answer the queries.
+        partition : Ignored
+            Not used, present for API consistency.
+        n_clusters : Ignored
+            Not used, present for API consistency.
+
+        """
         X = self._check_dataset_type(X)
 
         ml, cl = [], []
