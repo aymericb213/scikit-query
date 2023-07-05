@@ -1,0 +1,2 @@
+.. automodule:: skquery.strategy
+    :members:

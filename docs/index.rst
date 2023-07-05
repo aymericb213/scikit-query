@@ -20,6 +20,7 @@ Welcome to scikit-query's documentation!
    :maxdepth: 1
    :caption: API documentation:
 
+   api/strategy
    api/pairwise
    api/oracle
    api/exceptions
