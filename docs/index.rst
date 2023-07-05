@@ -17,7 +17,7 @@ Welcome to scikit-query's documentation!
 
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
    :caption: API documentation:
 
    api/strategy
