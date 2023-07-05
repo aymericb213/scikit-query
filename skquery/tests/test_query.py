@@ -10,7 +10,7 @@ def test_query():
     algorithms = [RandomMLCL, FFQS, MinMax, NPU, AIPC, SASC]
     incr_algos = [RandomMLCL, FFQS, MinMax, NPU]
 
-    dataset = clustbench.load_dataset("fcps", "lsun", path="clustering-data-v1")
+    dataset = clustbench.load_dataset("other", "iris", path="clustering-data-v1")
     labels = dataset.labels[0] - 1  # correspondance between clustbench and Python indexing
 
     budget = 10
