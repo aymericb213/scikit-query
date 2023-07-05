@@ -14,17 +14,12 @@ Welcome to scikit-query's documentation!
 
    This project is under active development.
 
-Indices and tables
-==================
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
-Contents
---------
 
 .. toctree::
+   :maxdepth: 1
+   :caption: API documentation:
 
-   usage
-   api
+   api/pairwise
+   api/oracle
+
