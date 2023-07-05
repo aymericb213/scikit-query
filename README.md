@@ -1,3 +1,4 @@
+[![Documentation Status](https://readthedocs.org/projects/scikit-query/badge/?version=latest)](https://scikit-query.readthedocs.io/en/latest/?badge=latest)
 [![version](https://img.shields.io/pypi/v/scikit-query)](https://pypi.org/project/scikit-query)
 [![Python](https://img.shields.io/pypi/pyversions/scikit-query)]()
 [![codecov](https://codecov.io/github/aymericb213/scikit-query/branch/main/graph/badge.svg?token=ZU4OEZKSP9)](https://codecov.io/github/aymericb213/scikit-query)
