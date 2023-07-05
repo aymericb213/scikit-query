@@ -17,11 +17,16 @@ Welcome to scikit-query's documentation!
 
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: API documentation:
 
    api/strategy
-   api/pairwise
    api/oracle
    api/exceptions
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Methods:
+
+   api/pairwise
 
