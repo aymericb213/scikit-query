@@ -1,5 +1,5 @@
-Usage
-=====
+The basics of scikit-query
+==========================
 
 This page explains how to install the library and use it in Python.
 
