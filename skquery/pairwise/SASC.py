@@ -83,6 +83,9 @@ class SASC(QueryStrategy):
         return constraints
 
     def _svdd(self, X, C, sigma):
+        """
+        Perform Support Vector Data Description.
+        """
         self.svdd = BaseSVDD(C=C, gamma=sigma, kernel='rbf', display='off')
         self.svdd.fit(X)
         #self.boundary = svdd.plot_boundary(dataset)
