@@ -162,8 +162,8 @@ class AIPC(QueryStrategy):
                 except StopIteration:
                     raise QueryNotFoundError
                 strong_samples.sort(key=lambda x: self._symmetric_relative_entropy(xweak, x, k))
-                first_strong = strong_samples[0][1]
-                second_strong = strong_samples[1][1]
+                first_strong = strong_samples[0][0]
+                second_strong = strong_samples[1][0]
 
                 try:
                     if oracle.query(xweak, second_strong):

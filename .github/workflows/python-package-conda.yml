@@ -37,7 +37,7 @@ jobs:
       run: |
         git clone https://github.com/gagolews/clustering-data-v1.git
         conda install pytest pytest-cov
-        pytest --cov-report xml --cov=skquery
+        pytest --cov-report xml --cov-config=.coveragerc --cov=skquery
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v3
       with:

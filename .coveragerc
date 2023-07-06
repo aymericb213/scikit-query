@@ -1,0 +1,5 @@
+[run]
+omit =
+    */tests/*
+    */utils/BaseSVDD.py
+    */pairwise/Pairwise.py
