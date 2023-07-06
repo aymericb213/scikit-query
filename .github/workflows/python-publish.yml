@@ -8,7 +8,10 @@
 
 name: Upload Python Package
 
-on: [push]
+on:
+  release:
+    types: [published]
+
 
 permissions:
   contents: read
@@ -27,7 +30,6 @@ jobs:
     - name: Insert Version number
       run: |
         RELEASE_VERSION=${GITHUB_REF#refs/*/}
-        RELEASE_VERSION=0.2
         sed -i -E "s/__version__ = .*/__version__ = \"$RELEASE_VERSION\"/" skquery/__init__.py
         cat skquery/__init__.py
     - name: Install dependencies
