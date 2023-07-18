@@ -28,7 +28,7 @@ class AIPC(QueryStrategy):
     epsilon : float
         Threshold value for the entropy of weak samples.
         The value can be given at initialization,
-        otherwise it is computed during fit.
+        otherwise it is computed during ``fit``.
     fuzzy_partition : array-like
         Soft partition of the dataset computed by fuzzy c-means clustering.
 

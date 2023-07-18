@@ -48,7 +48,25 @@ class SASC(QueryStrategy):
         self.max = 0
 
     def fit(self, X, oracle, partition=None, n_clusters=None):
+        """
+        Select pairwise constraints with SASC.
 
+        Parameters
+        ----------
+        X : array-like
+            Instances to use for query.
+        oracle : callable
+            Source of background knowledge able to answer the queries.
+        partition : Ignored
+            Not used, present for API consistency.
+        n_clusters : Ignored
+            Not used, present for API consistency.
+
+        Returns
+        -------
+        constraints : dict of lists
+            ML and CL sequentially selected constraints.
+        """
         #K = self._get_number_of_clusters(partition, n_clusters)
 
         #SVDD parameters : soft margin constant and kernel parameters
@@ -68,14 +86,14 @@ class SASC(QueryStrategy):
         # Assumption A
         budget_ha = int(self.alpha * oracle.budget)
         t = 0
-        u_t_ij = self.u_indA(X)
+        u_t_ij = self._u_indA(X)
         while t < budget_ha:
             self.u_t(c_t, u_t_ij, cl, ml, False)
             t += 1
 
         # Assumption B
         t = 0
-        u_t_ij = self.u_indB(X)
+        u_t_ij = self._u_indB(X)
         while t < oracle.budget - budget_ha:
             self.u_t(c_t, u_t_ij, cl, ml, True)
             t += 1
@@ -85,6 +103,15 @@ class SASC(QueryStrategy):
     def _svdd(self, X, C, sigma):
         """
         Perform Support Vector Data Description.
+
+        Parameters
+        ----------
+        X : array-like
+            Instances to use for query.
+        C : int
+            Soft margin constant.
+        sigma : int
+            RBF kernel scale parameter.
         """
         self.svdd = BaseSVDD(C=C, gamma=sigma, kernel='rbf', display='off')
         self.svdd.fit(X)
@@ -143,15 +170,43 @@ class SASC(QueryStrategy):
         self.p_dists_sv = squareform(pdist(X.iloc[self.support_vectors, :]))
         self.max = np.max(self.p_dists_sv)
 
-    def d_out_ij(self, X, p1, p2):
-        f = lambda t: X.iloc[p1, :] + t * (X.iloc[p2, :] - X.iloc[p1, :])
-        candidates = [f(t) for t in np.arange(0.1, 1, 0.1) if self.is_between(X, p1, p2, f(t))]
-        return euclidean(X.iloc[p1, :], candidates[0])
-
-    def djc_t(self, c_t, i, j):
+    def _d_out_ij(self, X, i, j):
         """
-        La fonction djc_t , calcule la distance minimale entre une contrainte candidate (i, j) et un ensemble de contraintes Ct déjà sélectionnées.
+        Distance of the part of a constraints that is outside the description sphere.
 
+        Parameters
+        ----------
+        X : array-like
+            Instances to use for query.
+        i : int
+            First index of candidate constraint.
+        j : int
+            Second index of candidate constraint.
+
+        Returns
+        -------
+
+        """
+        f = lambda t: X.iloc[i, :] + t * (X.iloc[j, :] - X.iloc[i, :])
+        candidates = [f(t) for t in np.arange(0.1, 1, 0.1) if self.is_between(X, i, j, f(t))]
+        return euclidean(X.iloc[i, :], candidates[0])
+
+    def _d_ij_ct(self, c_t, i, j):
+        """
+        Minimal distance between a candidate constraint and the set of previously selected constraints.
+
+        Parameters
+        ----------
+        c_t : set of tuple
+            Set of constraints already selected.
+        i : int
+            First index of candidate constraint.
+        j : int
+            Second index of candidate constraint.
+
+        Returns
+        -------
+        d_ij_ct : minimal distance between (i,j) and C_t.
         """
         distances = np.zeros(len(c_t))
         for c in range(len(c_t)):
@@ -163,9 +218,23 @@ class SASC(QueryStrategy):
             distances[c] = np.min([dik + djl, dil + djk])
         return np.min(distances)
 
-    def u_indA(self, X):
+    def _u_indA(self, X):
         """
-        calcule d'une matrice d'utilité pour un ensemble de contraintes en se basant sur l'hypothèse A.
+        Compute individual utility of all pairwise constraints from the set of support vectors,
+        based on Assumption A : constraints will be more informative if the involved points are
+        close together while they are from disjointed regions.
+
+        Parameters
+        ----------
+        X : array-like
+            Instances to use for query.
+
+        Returns
+        -------
+        u_indA : (N_sv, N_sv) matrix of individual utilities from Assumption A.
+
+        Notes
+        -----
         Cette hypothèse suggère que les contraintes qui sont plus éloignées de leur propre cluster sont plus utiles.
 
         Voici un résumé du fonctionnement de cette fonction :
@@ -200,22 +269,22 @@ class SASC(QueryStrategy):
         son propre cluster et à d'autres clusters. Les contraintes qui sont plus éloignées de leur propre cluster
         et plus proches d'autres clusters sont considérées comme plus utiles.
         """
-        taille = len(self.support_vectors)
+        N_sv = len(self.support_vectors)
 
-        u_t_ij = np.zeros((taille, taille))
+        u_t_ij = np.zeros((N_sv, N_sv))
 
-        for i in range(0, taille):
-            for j in range(i + 1, taille):
+        for i in range(0, N_sv):
+            for j in range(i + 1, N_sv):
                 dij = self.p_dists_sv[i, j]
 
-                dijout = dij - self.d_out_ij(X, i, j)
+                dijout = dij - self._d_out_ij(X, i, j)
 
                 vijout = dijout / dij
 
                 u_t_ij[i, j] = vijout * (1 - (dij / self.max))
         return u_t_ij
 
-    def u_indB(self, X):
+    def _u_indB(self, X):
         """
         Calcule d'une matrice d'utilité pour un ensemble de contraintes en se basant sur l'hypothèse B.
         Cette hypothèse suggère que les contraintes qui sont plus proches de leur propre cluster sont plus utiles.
@@ -257,7 +326,7 @@ class SASC(QueryStrategy):
         for i in range(0, taille):
             for j in range(i + 1, taille):
                 dij = self.p_dists_sv[i, j]
-                dijout = dij - self.d_out_ij(X, i, j)
+                dijout = dij - self._d_out_ij(X, i, j)
                 vijout = dijout / dij
 
                 u_t_ij[i, j] = (1 - vijout) * (dij / self.max)
@@ -322,7 +391,7 @@ class SASC(QueryStrategy):
             for j in range((i + 1), len(self.support_vectors)):
 
                 if u_t_ij[i, j] != -1:
-                    djct = self.djc_t(c_t, i, j)
+                    djct = self._d_ij_ct(c_t, i, j)
                     u_t_ij[i, j] = (u_t_ij[i, j] * djct) / max
 
     def is_between(self, X, a, b, c):
