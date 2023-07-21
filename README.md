@@ -43,8 +43,12 @@ or in separate clusters (cannot-link). These are most widely studied constraints
 **Triplet** constraints, sometimes called relative constraints, define the relationship between 
 three data points : a reference point *a*, a positive point *p* and a negative point *n*.
 The positive point *p* is assumed to be more similar to *a* than *n* is. Formally, it is expressed as follows:
-$$ y_a = y_n \implies y_a = y_p $$
-$$ y_a \neq y_p \implies y_a \neq y_n $$
+
+```math
+y_a = y_n \implies y_a = y_p
+y_a \neq y_p \implies y_a \neq y_n
+```
+
 Querying a triplet constraint *(i,j,k)* amounts to asking the user : "Is *i* more similar to *j* than to *k* ?"
 The answer to the query will determine the roles of *j* and *k* in the constraint. Indeed, "no"
 would mean that *j* corresponds to the negative point *n*, and *k* corresponds to *p*, while "yes"
