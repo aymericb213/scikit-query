@@ -45,7 +45,7 @@ three data points : a reference point *a*, a positive point *p* and a negative p
 The positive point *p* is assumed to be more similar to *a* than *n* is. Formally, it is expressed as follows:
 
 ```math
-y_a = y_n \implies y_a = y_p
+y_a = y_n \implies y_a = y_p\\
 y_a \neq y_p \implies y_a \neq y_n
 ```
 
