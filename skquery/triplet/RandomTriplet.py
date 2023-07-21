@@ -3,16 +3,16 @@ from ..strategy import QueryStrategy
 from ..exceptions import NoAnswerError
 
 
-class RandomMLCL(QueryStrategy):
+class RandomTriplet(QueryStrategy):
     """
-    Random sampling of pairwise constraints.
+    Random sampling of triplet constraints.
     """
     def __init__(self):
         super().__init__()
 
     def fit(self, X, oracle, partition=None, n_clusters=None):
         """
-        Selects pairwise constraints randomly.
+        Selects triplet constraints randomly.
 
         Parameters
         ----------
@@ -28,18 +28,17 @@ class RandomMLCL(QueryStrategy):
         """
         X = self._check_dataset_type(X)
 
-        ml, cl = [], []
-        constraints = {"ml": ml, "cl": cl}
-        candidates = [np.random.choice(range(X.shape[0]), size=2, replace=False).tolist() for _ in range(oracle.budget)]
+        triplet = []
+        constraints = {"triplet": triplet}
+        candidates = [np.random.choice(range(X.shape[0]), size=3, replace=False).tolist() for _ in range(oracle.budget)]
 
-        for i, j in candidates:
+        for i, j, k in candidates:
             try:
-                if oracle.query(i, j):
-                    ml.append((i, j))
+                if oracle.query(i, j, k):
+                    triplet.append((i, j, k))
                 else:
-                    cl.append((i, j))
+                    triplet.append((j, k, i))
             except NoAnswerError:
                 continue
-
 
         return constraints
