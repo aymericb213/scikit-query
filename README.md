@@ -40,11 +40,21 @@ constraints = qs.fit(dataset, oracle)
 establish a relation between two data points : they must be in the same cluster (must-link)
 or in separate clusters (cannot-link). These are most widely studied constraints for clustering.
 
+**Triplet** constraints, sometimes called relative constraints, define the relationship between 
+three data points : a reference point *a*, a positive point *p* and a negative point *n*.
+The positive point *p* is assumed to be more similar to *a* than *n* is. Formally, it is expressed as follows:
+$$ y_a = y_n \implies y_a = y_p $$
+$$ y_a \neq y_p \implies y_a \neq y_n $$
+Querying a triplet constraint *(i,j,k)* amounts to asking the user : "Is *i* more similar to *j* than to *k* ?"
+The answer to the query will determine the roles of *j* and *k* in the constraint. Indeed, "no"
+would mean that *j* corresponds to the negative point *n*, and *k* corresponds to *p*, while "yes"
+would mean the reverse.
+
 ## Algorithms
 
 | Algorithm       | Description                            | Constraint type | Works in incremental setting ? | Source                                                                                  | Date |
 |-----------------|----------------------------------------|-----------------|--------------------------------|-----------------------------------------------------------------------------------------|------|
-| Random sampling |                                        | ML/CL           | :heavy_check_mark:             |                                                                                         |      |
+| Random sampling |                                        | ML/CL, triplet  | :heavy_check_mark:             |                                                                                         |      |
 | FFQS            | Neighborhood-based                     | ML/CL           | :heavy_check_mark:             | [Basu et al.](https://epubs.siam.org/doi/10.1137/1.9781611972740.31)                    | 2004   |
 | MMFFQS (MinMax) | Neighborhood-based, similarity         | ML/CL           | :heavy_check_mark:             | [Mallapragada et al.](https://ieeexplore.ieee.org/document/4761792)                     | 2008                                                                 |
 | NPU             | Neighborhood-based, information theory | ML/CL           | :heavy_check_mark:             | [Xiong et al.](https://dl.acm.org/doi/10.1109/TKDE.2013.22)                             | 2013                                                                 |
