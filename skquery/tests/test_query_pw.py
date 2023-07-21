@@ -6,7 +6,7 @@ from time import time
 from tqdm import tqdm
 
 
-def test_query():
+def test_query_pw():
     algorithms = [RandomMLCL, FFQS, MinMax, NPU, AIPC, SASC]
     incr_algos = [RandomMLCL, FFQS, MinMax, NPU]
 
