@@ -22,7 +22,7 @@ def test_query_pw():
         t1 = time()
         constraints = qs.fit(dataset.data, MLCLOracle(truth=labels, budget=budget),
                              n_clusters=dataset.n_clusters[0])
-        #qs.csts_to_file(constraints)
+        qs.csts_to_file(constraints)
         print(f"\n{strat.__name__} : {time() - t1} s")
         assert len(constraints) > 0
 

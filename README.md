@@ -34,25 +34,6 @@ oracle = MLCLOracle(truth=labels, budget=10)
 constraints = qs.fit(dataset, oracle)
 ```
 
-## Constraints
-
-**Must-link** and **cannot-link** (ML/CL) constraints, also referred to as pairwise constraints,
-establish a relation between two data points : they must be in the same cluster (must-link)
-or in separate clusters (cannot-link). These are most widely studied constraints for clustering.
-
-**Triplet** constraints, sometimes called relative constraints, define the relationship between 
-three data points : a reference point *a*, a positive point *p* and a negative point *n*.
-The positive point *p* is assumed to be more similar to *a* than *n* is. Formally, it is expressed as follows:
-
-```math
-y_a = y_n \implies y_a = y_p \wedge y_a \neq y_p \implies y_a \neq y_n
-```
-
-Querying a triplet constraint *(i,j,k)* amounts to asking the user : "Is *i* more similar to *j* than to *k* ?"
-The answer to the query will determine the roles of *j* and *k* in the constraint. Indeed, "no"
-would mean that *j* corresponds to the negative point *n*, and *k* corresponds to *p*, while "yes"
-would mean the reverse.
-
 ## Algorithms
 
 | Algorithm       | Description                            | Constraint type | Works in incremental setting ? | Source                                                                                  | Date |

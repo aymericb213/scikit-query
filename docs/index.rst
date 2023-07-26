@@ -29,10 +29,10 @@ taking a data partition into account.
 
 .. toctree::
    :maxdepth: 1
-   :caption: Usage:
+   :caption: General information:
 
    usage
-
+   constraints
 
 .. toctree::
    :maxdepth: 1
