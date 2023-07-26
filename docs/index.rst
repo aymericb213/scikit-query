@@ -29,16 +29,17 @@ taking a data partition into account.
 
 .. toctree::
    :maxdepth: 1
-   :caption: General information:
+   :caption: General information
 
    usage
    constraints
 
 .. toctree::
    :maxdepth: 1
-   :caption: API documentation:
+   :caption: API documentation
 
    api/pairwise
+   api/triplet
    api/strategy
    api/oracle
    api/exceptions
