@@ -39,11 +39,11 @@ class TripletOracle:
         Parameters
         ----------
         i : int
-            Index of first data point.
+            Index of first data point, the reference.
         j : int
-            Index of second data point.
+            Index of second data point, the assumed positive example.
         k : int
-            Index of third data point.
+            Index of third data point, the assumed negative example.
 
         Returns
         -------
@@ -58,9 +58,9 @@ class TripletOracle:
         if self.queries < self.budget:
             self.queries += 1
             if self.truth is not None:
-                if self.truth[i] == self.truth[j] and self.truth[j] != self.truth[k]:
+                if self.truth[i] == self.truth[j] and self.truth[i] != self.truth[k]:
                     return True
-                elif self.truth[i] != self.truth[j] and self.truth[j] == self.truth[k]:
+                elif self.truth[i] != self.truth[j] and self.truth[i] == self.truth[k]:
                     return False
                 else:
                     raise NoAnswerError
