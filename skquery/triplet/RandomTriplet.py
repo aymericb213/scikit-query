@@ -37,7 +37,7 @@ class RandomTriplet(QueryStrategy):
                 if oracle.query(i, j, k):
                     triplet.append((i, j, k))
                 else:
-                    triplet.append((j, k, i))
+                    triplet.append((i, k, j))
             except NoAnswerError:
                 continue
 
