@@ -9,7 +9,7 @@
 project = 'scikit-query'
 copyright = '2023, scikit-query developers'
 author = 'scikit-query developers'
-release = '0.2'
+release = '0.4'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -55,6 +55,7 @@ autodoc_default_flags = ['members', 'special-members']
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
+html_theme = "sphinx_rtd_theme"
 html_static_path = ['_static']
 
 # Output file base name for HTML help builder.
