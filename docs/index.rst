@@ -42,4 +42,5 @@ taking a data partition into account.
    api/triplet
    api/strategy
    api/oracle
+   api/select
    api/exceptions
