@@ -34,9 +34,9 @@ class FFQS(QueryStrategy):
 
     References
     ----------
-    .. [1] Basu, S., Banerjee, A., Mooney, R. Active Semi-Supervision for
-           Pairwise Constrained Clustering. 2004. Proceedings of the 2004 SIAM International
-           Conference on Data Mining. ISBN 978-1-61197-274-0, pp. 333-344.
+    . [1] Basu, S., Banerjee, A., Mooney, R. Active Semi-Supervision for
+          Pairwise Constrained Clustering. 2004. Proceedings of the 2004 SIAM International
+          Conference on Data Mining. ISBN 978-1-61197-274-0, pp. 333-344.
     """
     def __init__(self, neighborhoods=None, distances=None):
         super().__init__()
