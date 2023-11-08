@@ -31,6 +31,7 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
+    'sphinx_rtd_theme',
 ]
 numpydoc_show_class_members = False
 numpydoc_show_inherited_class_members = False
@@ -55,7 +56,7 @@ autodoc_default_flags = ['members', 'special-members']
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = "alabaster"
+html_theme = "sphinx_rtd_theme"
 html_static_path = ['_static']
 
 # Output file base name for HTML help builder.
