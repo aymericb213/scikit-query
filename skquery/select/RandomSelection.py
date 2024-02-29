@@ -20,6 +20,8 @@ class RandomSelection(QueryStrategy):
             Dataset to select from.
         partition: Ignored
             Not used, present for API consistency.
+        return_best: bool, default=False
+            Whether to return the best sample along with the set of selected samples.
 
         Returns
         -------

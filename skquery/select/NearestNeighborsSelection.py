@@ -9,6 +9,14 @@ class NearestNeighborsSelection(QueryStrategy):
         """
         Selects the most informative samples according to the Cai et al. strategy,
         which selects the samples that have neighbors from different clusters.
+
+        Parameters
+        ----------
+        m: int or float
+            Number of nearest neighbors to use for the selection.
+            If a float is provided, it will be interpreted as a percentage of the dataset size.
+        distances: array-like, default=None
+            Precomputed distances between samples. If None, the distances will be computed on the fly.
         """
         super().__init__()
         if 0 < m < 1:

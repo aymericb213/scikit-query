@@ -55,7 +55,8 @@ class MinMax(FFQS):
 
         unqueried_indices = set(range(X.shape[0])) - skeleton - self.unknown
 
-        # Compute width σ of Gaussian kernel (20% as per the article)
+        # Compute width σ of Gaussian kernel (20th percentile of the pairwise distances distribution
+        # as per the article)
         percent = 20
         assert 0 < percent <= 100
         # Here squareform makes square-form -> vector-form transformation

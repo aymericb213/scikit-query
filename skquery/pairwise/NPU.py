@@ -152,7 +152,7 @@ class NPU(QueryStrategy):
         X : array-like
             Instances to use for query.
         n_trees : int, default=50
-            Number of estimators in the random forest.
+            Number of estimators in the random forest. Default is 50 as per the original paper.
         
         Returns
         -------

@@ -51,5 +51,5 @@ class EntropySelection(QueryStrategy):
         entropies = np.array([entropy([u[c][i] for c in range(len(set(partition)))]) for i in range(X.shape[0])])
         desc_entropies = np.flip(np.sort(entropies))
         threshhold = desc_entropies[int(np.round(coeff))]
-        selected = [i for i in range(X.shape[0]) if entropies[i] >= threshhold]
+        selected = np.where(entropies >= threshhold)[0]
         return selected, np.argmax(entropies) if return_best else selected
