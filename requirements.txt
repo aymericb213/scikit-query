@@ -4,6 +4,8 @@ cvxopt
 matplotlib
 numpy
 polars
+setuptools
 scikit_fuzzy
 scikit_learn
 scipy
+
