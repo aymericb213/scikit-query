@@ -200,7 +200,7 @@ class NPU(QueryStrategy):
             if not np.any(p[x_i, ] == 1):
                 positive_p_i = p[x_i, p[x_i, ] > 0]
                 uncertainties[x_i] = entropy(positive_p_i, base=2)
-                expected_costs[x_i] = rv_discrete(values=(range(1, len(positive_p_i) + 1), positive_p_i)).expect()
+                expected_costs[x_i] = rv_discrete(values=(range(1, len(positive_p_i) + 1), np.flip(sorted(positive_p_i)))).expect()
             else:
                 # case where neighborhood affectation is certain
                 uncertainties[x_i] = 0

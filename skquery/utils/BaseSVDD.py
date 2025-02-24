@@ -207,7 +207,7 @@ class BaseSVDD(BaseEstimator, OutlierMixin):
         P = K + K.T
 
         # q
-        q = -np.multiply(self.y, np.mat(np.diagonal(K)).T)
+        q = -np.multiply(self.y, np.asmatrix(np.diagonal(K)).T)
 
         # G
         G1 = -np.eye(n)
@@ -326,7 +326,7 @@ class BaseSVDD(BaseEstimator, OutlierMixin):
         tmp_1 = np.dot(np.ones((X.shape[0], 1), dtype=np.int64), self.alpha.T)
         tmp_2 = np.multiply(tmp_1, K)
         tmp_ = -2 * np.sum(tmp_2, axis=1, keepdims=True)
-        distance = np.sqrt(np.mat(np.diag(K_)).T + self.offset + tmp_)
+        distance = np.sqrt(np.asmatrix(np.diag(K_)).T + self.offset + tmp_)
         return distance
 
     def fit_predict(self, X, y=None, weight=None):
@@ -431,7 +431,7 @@ class BaseSVDD(BaseEstimator, OutlierMixin):
 
         # check for data dimensionality
         if len(X.shape) != 2 or len(y.shape) != 2:
-            raise SyntaxError("The X and y must be 2D.\n")
+            raise SyntaxError(f"The X and y must be 2D, not {X.shape}\n")
 
         # check for data length
         if X.shape[0] != y.shape[0]:

@@ -1,4 +1,4 @@
-import pandas as pd
+import polars as pl
 
 
 class QueryStrategy:
@@ -20,7 +20,7 @@ class QueryStrategy:
         X : array-like
             Instances to use for query.
         """
-        return pd.DataFrame(X)
+        return pl.DataFrame(X)
 
     def _get_number_of_clusters(self, partition, k):
         """

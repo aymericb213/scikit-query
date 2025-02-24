@@ -6,6 +6,7 @@
 from ..exceptions import EmptyBudgetError, QueryNotFoundError, NoAnswerError
 from ..strategy import QueryStrategy
 import numpy as np
+import pandas as pd
 from scipy.stats import entropy
 import skfuzzy as fuzzy
 
@@ -117,7 +118,7 @@ class AIPC(QueryStrategy):
         Default values for ``fuzziness``, ``tolerance`` and ``max_iter``
         replicate the experimental setup in the article.
         """
-        cntr, u, u0, d, jm, p, fpc = fuzzy.cmeans(X.T, k, fuzziness, tolerance, maxiter=max_iter)
+        cntr, u, u0, d, jm, p, fpc = fuzzy.cmeans(np.array(X).T, k, fuzziness, tolerance, maxiter=max_iter)
         self.fuzzy_partition = u
         return d
 

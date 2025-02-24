@@ -1,9 +1,9 @@
 active_semi_supervised_clustering>=0.0.1
-clustering_benchmarks>=1.1.1
-cvxopt>=1.3.1
-matplotlib>=3.7.1
-numpy>=1.24.0
-pandas>=2.0.3
-scikit_fuzzy>=0.4.2
-scikit_learn>=1.2.2
-scipy>=1.11.1
+clustering_benchmarks>=1.0.0
+cvxopt
+matplotlib
+numpy
+polars
+scikit_fuzzy
+scikit_learn
+scipy
