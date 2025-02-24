@@ -23,7 +23,7 @@ jobs:
         echo $CONDA/bin >> $GITHUB_PATH
     - name: Install dependencies
       run: |
-        conda install conda
+        conda install conda=25.1.1
         conda install python==${{ matrix.python-version }}
         pip install pandas numpy scipy scikit-learn scikit-learn-intelex scikit-fuzzy clustering-benchmarks active-semi-supervised-clustering cvxopt
     - name: Lint with flake8
