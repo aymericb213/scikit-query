@@ -6,11 +6,11 @@ from time import time
 from tqdm import tqdm
 
 
-def test_query_triplet():
+def test_query_triplet(clustbench_path):
     algorithms = [RandomTriplet]
     incr_algos = [RandomTriplet]
 
-    dataset = clustbench.load_dataset("other", "iris", path="clustering-data-v1")
+    dataset = clustbench.load_dataset("other", "iris", path=clustbench_path)
     labels = dataset.labels[0] - 1  # correspondance between clustbench and Python indexing
 
     budget = 10

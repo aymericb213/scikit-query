@@ -6,11 +6,11 @@ from time import time
 from tqdm import tqdm
 
 
-def test_query_pw():
+def test_query_pw(clustbench_path):
     algorithms = [RandomMLCL, FFQS, MinMax, NPU, AIPC, SASC]
     incr_algos = [RandomMLCL, FFQS, MinMax, NPU]
 
-    dataset = clustbench.load_dataset("fcps", "lsun", path="clustering-data-v1")
+    dataset = clustbench.load_dataset("fcps", "lsun", path=clustbench_path)
     labels = dataset.labels[0] - 1  # correspondance between clustbench and Python indexing
 
     budget = 10

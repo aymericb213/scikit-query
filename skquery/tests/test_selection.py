@@ -5,10 +5,10 @@ from active_semi_clustering import COPKMeans
 from skquery.select import *
 
 
-def test_selection():
+def test_selection(clustbench_path):
     selections = [RandomSelection, NearestNeighborsSelection, EntropySelection]
 
-    dataset = clustbench.load_dataset("other", "iris", path="clustering-data-v1")
+    dataset = clustbench.load_dataset("other", "iris", path=clustbench_path)
 
     cc_alg = COPKMeans(n_clusters=dataset.n_clusters[0])
     cc_alg.fit(dataset.data)
