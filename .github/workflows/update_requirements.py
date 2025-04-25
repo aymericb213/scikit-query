@@ -20,9 +20,13 @@ print(packages_dict.keys())
 for line_idx, line in enumerate(content_list):
     print(line)
     try:
-        name = line.split(">=")[0]
-        line = line.replace("\n", "")
-        line += f",<{packages_dict[name]}\n"
+        if ">=" in line:
+            name = line.split(">=")[0]
+            line = line.replace("\n", "")
+            line += f",<{packages_dict[name]}\n"
+        else:
+            line = line.replace("\n", "")
+            line += f"<{packages_dict[line]}\n"
         content_list[line_idx] = line
     except:
         continue
